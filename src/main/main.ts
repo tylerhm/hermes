@@ -11,9 +11,10 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain } from 'electron';
+import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import Store from 'electron-store';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 
@@ -27,10 +28,17 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-ipcMain.on('ipc-example', async (event, arg) => {
-  const msgTemplate = (pingPong: string) => `IPC test: ${pingPong}`;
-  console.log(msgTemplate(arg));
-  event.reply('ipc-example', msgTemplate('pong'));
+// Store for the main thread.
+const store = new Store();
+
+// Open file dialog and save selections by key.
+ipcMain.on('renderer-select-file', async (event, key) => {
+  const file = await dialog.showOpenDialog({ properties: ['openFile'] });
+  const filePath = file.filePaths[0];
+  const fileName = filePath.split('/').at(-1);
+
+  store.set(key, filePath);
+  event.reply('electron-file-selected', key, fileName);
 });
 
 if (process.env.NODE_ENV === 'production') {
