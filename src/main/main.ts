@@ -38,7 +38,7 @@ ipcMain.on('renderer-select-file', async (event, key) => {
   const fileName = filePath.split('/').at(-1);
 
   store.set(key, filePath);
-  event.reply('electron-file-selected', key, fileName);
+  event.reply('main-file-selected', key, fileName);
 });
 
 if (process.env.NODE_ENV === 'production') {
