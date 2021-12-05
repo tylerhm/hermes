@@ -1,29 +1,12 @@
-const container = {
-  overflow: 'hidden',
-  width: '100vw',
-  height: '100vh',
-  display: 'flex',
-  flexDirection: 'col',
-  justifyContent: 'center',
-  alignItems: 'center',
-};
-
-const buttonGroup = {
-  display: 'flex',
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  alignItems: 'center',
-};
+import './Home.css';
 
 export default function Hello() {
-  return <div style={container}>
-    <div style={buttonGroup}>
-      <div>
-        test one
-      </div>
-      <div>
-        test two
+  return (
+    <div className="container">
+      <div className="buttonGroup">
+        <div>test one</div>
+        <div>test two</div>
       </div>
     </div>
-  </div>;
+  );
 }
