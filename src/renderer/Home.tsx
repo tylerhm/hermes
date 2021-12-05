@@ -1,6 +1,6 @@
 import './Home.css';
 
-export default function Hello() {
+export default function Home() {
   return (
     <div className="container">
       <div className="buttonGroup">
