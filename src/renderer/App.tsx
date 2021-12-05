@@ -7,8 +7,8 @@ declare global {
     electron: {
       ipcRenderer: {
         on: (listener: string, func: any) => void;
+        once: (listener: string, func: any) => void;
         removeListener: (listener: string, func: any) => void;
-        myPing: () => void;
         setFile: (key: string) => void;
       };
     };
