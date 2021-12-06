@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Container } from 'react-bootstrap';
 import CHANNELS from './channels';
-import './Home.css';
-
-type FileKey = 'source' | 'data' | 'input' | 'output';
+import { FileKeyType } from './Types';
+import FileSelectionRow from './FileSelectionRow';
 
 type FileData = {
-  [K in FileKey]?: string;
+  [K in FileKeyType]?: string;
 };
 
 const FILE_KEYS = {
@@ -21,7 +21,7 @@ export default function Home() {
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateFileName = (key: FileKey, name: string) => {
+  const updateFileName = (key: FileKeyType, name: string) => {
     setFileInfo({ ...fileInfo, [key]: name });
   };
 
@@ -36,36 +36,23 @@ export default function Home() {
     };
   }, [updateFileName]);
 
-  const onSelectFile = (key: FileKey) => {
+  const onSelectFile = (key: FileKeyType) => {
     window.electron.ipcRenderer.setFile(key, key === FILE_KEYS.DATA);
   };
 
   return (
-    <div className="container">
-      <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFile('source')}>
-          Select Source
-        </button>
-        {fileInfo.source}
-      </div>
-      <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFile('data')}>
-          Select Data
-        </button>
-        {fileInfo.data}
-      </div>
-      <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFile('input')}>
-          Select Input
-        </button>
-        {fileInfo.input}
-      </div>
-      <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFile('output')}>
-          Select Output
-        </button>
-        {fileInfo.output}
-      </div>
-    </div>
+    <Container style={{ margin: '1em' }}>
+      <FileSelectionRow
+        fileKey="source"
+        name={fileInfo.source}
+        onClick={onSelectFile}
+      />
+      <FileSelectionRow
+        fileKey="data"
+        name={fileInfo.data}
+        onClick={onSelectFile}
+        isDir
+      />
+    </Container>
   );
 }
