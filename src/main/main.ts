@@ -17,6 +17,7 @@ import log from 'electron-log';
 import Store from 'electron-store';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
+import CHANNELS from './channels';
 
 export default class AppUpdater {
   constructor() {
@@ -32,13 +33,13 @@ let mainWindow: BrowserWindow | null = null;
 const store = new Store();
 
 // Open file dialog and save selections by key.
-ipcMain.on('renderer-select-file', async (event, key) => {
+ipcMain.on(CHANNELS.SELECT_FILE, async (event, key) => {
   const file = await dialog.showOpenDialog({ properties: ['openFile'] });
   const filePath = file.filePaths[0];
   const fileName = filePath.split('/').at(-1);
 
   store.set(key, filePath);
-  event.reply('main-file-selected', key, fileName);
+  event.reply(CHANNELS.FILE_SELECTED, key, fileName);
 });
 
 if (process.env.NODE_ENV === 'production') {

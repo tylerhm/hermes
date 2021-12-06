@@ -1,27 +1,24 @@
 const { contextBridge, ipcRenderer } = require('electron');
+const CHANNELS = require('./channels');
 
-const validChannels = ['renderer-select-file', 'main-file-selected'];
+const validChannels = Object.values(CHANNELS);
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
     setFile(key) {
-      ipcRenderer.send('renderer-select-file', key);
+      ipcRenderer.send(CHANNELS.SELECT_FILE, key);
     },
     on(channel, func) {
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
+      // Deliberately strip event as it includes `sender`
+      if (validChannels.includes(channel))
         ipcRenderer.on(channel, (event, ...args) => func(...args));
-      }
     },
     once(channel, func) {
-      if (validChannels.includes(channel)) {
-        // Deliberately strip event as it includes `sender`
+      if (validChannels.includes(channel))
         ipcRenderer.once(channel, (event, ...args) => func(...args));
-      }
     },
     removeListener(channel, func) {
-      if (validChannels.includes(channel)) {
+      if (validChannels.includes(channel))
         ipcRenderer.removeListener(channel, (event, ...args) => func(...args));
-      }
     },
   },
 });
