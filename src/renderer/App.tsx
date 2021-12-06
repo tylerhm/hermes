@@ -9,7 +9,7 @@ declare global {
         on: (listener: string, func: any) => void;
         once: (listener: string, func: any) => void;
         removeListener: (listener: string, func: any) => void;
-        setFile: (key: string) => void;
+        setFile: (key: string, isDirectory: boolean) => void;
       };
     };
   }

@@ -7,8 +7,8 @@ contextBridge.exposeInMainWorld('electron', {
     getChannels() {
       return CHANNELS;
     },
-    setFile(key) {
-      ipcRenderer.send(CHANNELS.SELECT_FILE, key);
+    setFile(key, isDirectory) {
+      ipcRenderer.send(CHANNELS.SELECT_FILE, key, isDirectory);
     },
     on(channel, func) {
       // Deliberately strip event as it includes `sender`

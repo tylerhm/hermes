@@ -2,25 +2,27 @@ import { useEffect, useState } from 'react';
 import CHANNELS from './channels';
 import './Home.css';
 
-export default function Home() {
-  const [sourceName, setSourceName] = useState<string>('');
-  const [inputName, setInputName] = useState<string>('');
-  const [outputName, setOutputName] = useState<string>('');
+type FileKey = 'source' | 'data' | 'input' | 'output';
 
-  const updateFileName = (key: string, name: string) => {
-    switch (key) {
-      case 'source':
-        setSourceName(name);
-        break;
-      case 'input':
-        setInputName(name);
-        break;
-      case 'output':
-        setOutputName(name);
-        break;
-      default:
-        console.error('Invalid file classifier');
-    }
+type FileData = {
+  [K in FileKey]?: string;
+};
+
+const FILE_KEYS = {
+  SOURCE: 'source',
+  DATA: 'data',
+  INPUT: 'input',
+  OUTPUT: 'output',
+};
+
+export default function Home() {
+  const [fileInfo, setFileInfo] = useState<FileData>({});
+  const [isSingleTestCase, setIsSingleTestCase] = useState<boolean>(false);
+
+  // This is ok because the setter is only called as a LISTENER
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const updateFileName = (key: FileKey, name: string) => {
+    setFileInfo({ ...fileInfo, [key]: name });
   };
 
   useEffect(() => {
@@ -32,31 +34,37 @@ export default function Home() {
         updateFileName
       );
     };
-  }, []);
+  }, [updateFileName]);
 
-  const onSelectFileName = (key: string) => {
-    window.electron.ipcRenderer.setFile(key);
+  const onSelectFile = (key: FileKey) => {
+    window.electron.ipcRenderer.setFile(key, key === FILE_KEYS.DATA);
   };
 
   return (
     <div className="container">
       <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFileName('source')}>
+        <button type="button" onClick={() => onSelectFile('source')}>
           Select Source
         </button>
-        {sourceName}
+        {fileInfo.source}
       </div>
       <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFileName('input')}>
+        <button type="button" onClick={() => onSelectFile('data')}>
+          Select Data
+        </button>
+        {fileInfo.data}
+      </div>
+      <div className="buttonGroup">
+        <button type="button" onClick={() => onSelectFile('input')}>
           Select Input
         </button>
-        {inputName}
+        {fileInfo.input}
       </div>
       <div className="buttonGroup">
-        <button type="button" onClick={() => onSelectFileName('output')}>
+        <button type="button" onClick={() => onSelectFile('output')}>
           Select Output
         </button>
-        {outputName}
+        {fileInfo.output}
       </div>
     </div>
   );

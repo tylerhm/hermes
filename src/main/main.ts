@@ -33,14 +33,25 @@ let mainWindow: BrowserWindow | null = null;
 const store = new Store();
 
 // Open file dialog and save selections by key.
-ipcMain.on(CHANNELS.SELECT_FILE, async (event, key) => {
-  const file = await dialog.showOpenDialog({ properties: ['openFile'] });
-  const filePath = file.filePaths[0];
-  const fileName = filePath.split('/').at(-1);
+ipcMain.on(
+  CHANNELS.SELECT_FILE,
+  async (event, key: string, isDirectory: boolean) => {
+    dialog
+      .showOpenDialog({
+        properties: [isDirectory ? 'openDirectory' : 'openFile'],
+      })
+      .then((file) => {
+        if (file.filePaths.length > 0) {
+          const filePath = file.filePaths[0];
+          const fileName = filePath.split('/').at(-1);
 
-  store.set(key, filePath);
-  event.reply(CHANNELS.FILE_SELECTED, key, fileName);
-});
+          store.set(key, filePath);
+          event.reply(CHANNELS.FILE_SELECTED, key, fileName);
+        }
+      })
+      .catch((err) => console.error(err));
+  }
+);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
