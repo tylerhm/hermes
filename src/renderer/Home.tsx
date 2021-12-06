@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import CHANNELS from './channels';
 import './Home.css';
 
 export default function Home() {
@@ -23,11 +24,11 @@ export default function Home() {
   };
 
   useEffect(() => {
-    window.electron.ipcRenderer.on('main-file-selected', updateFileName);
+    window.electron.ipcRenderer.on(CHANNELS.FILE_SELECTED, updateFileName);
 
     return () => {
       window.electron.ipcRenderer.removeListener(
-        'main-file-selected',
+        CHANNELS.FILE_SELECTED,
         updateFileName
       );
     };
