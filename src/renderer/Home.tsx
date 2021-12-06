@@ -17,7 +17,7 @@ const FILE_KEYS = {
 
 export default function Home() {
   const [fileInfo, setFileInfo] = useState<FileData>({});
-  const [isSingleTestCase, setIsSingleTestCase] = useState<boolean>(false);
+  // const [isSingleTestCase, setIsSingleTestCase] = useState<boolean>(false);
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
