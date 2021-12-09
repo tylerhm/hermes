@@ -4,11 +4,11 @@ const CHANNELS = require('./channels');
 const validChannels = Object.values(CHANNELS);
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
-    getChannels() {
-      return CHANNELS;
-    },
     setFile(key, isDirectory) {
       ipcRenderer.send(CHANNELS.SELECT_FILE, key, isDirectory);
+    },
+    judge() {
+      ipcRenderer.send(CHANNELS.JUDGE);
     },
     on(channel, func) {
       // Deliberately strip event as it includes `sender`

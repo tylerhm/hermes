@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Container } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import CHANNELS from './channels';
 import { FileKeyType } from './Types';
 import FileSelectionRow from './FileSelectionRow';
@@ -40,6 +40,10 @@ export default function Home() {
     window.electron.ipcRenderer.setFile(key, key === FILE_KEYS.DATA);
   };
 
+  const judge = () => {
+    window.electron.ipcRenderer.judge();
+  };
+
   return (
     <Container style={{ margin: '1em' }}>
       <FileSelectionRow
@@ -53,6 +57,9 @@ export default function Home() {
         onClick={onSelectFile}
         isDir
       />
+      <Button variant="primary" onClick={judge}>
+        Judge
+      </Button>
     </Container>
   );
 }

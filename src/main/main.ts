@@ -15,6 +15,7 @@ import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
 import Store from 'electron-store';
+import { c, cpp, python, java } from 'compile-run';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
@@ -52,6 +53,25 @@ ipcMain.on(
       .catch((err) => console.error(err));
   }
 );
+
+ipcMain.on(CHANNELS.JUDGE, async (event) => {
+  const source = store.get('source', null) as string;
+  const data = store.get('data', null) as string;
+
+  // TODO: warn user
+  if (source == null || data == null) {
+    return;
+  }
+
+  cpp
+    .runFile(source, { stdin: 'test' })
+    .then((res) => {
+      console.log(res);
+    })
+    .catch((err) => {
+      console.error(err);
+    });
+});
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
