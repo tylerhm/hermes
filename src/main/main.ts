@@ -11,14 +11,13 @@
 import 'core-js/stable';
 import 'regenerator-runtime/runtime';
 import path from 'path';
-import { app, BrowserWindow, shell, ipcMain, dialog } from 'electron';
+import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
-import Store from 'electron-store';
-import { c, cpp, python, java } from 'compile-run';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
+import { selectFile, judge } from './utils';
 
 export default class AppUpdater {
   constructor() {
@@ -30,48 +29,8 @@ export default class AppUpdater {
 
 let mainWindow: BrowserWindow | null = null;
 
-// Store for the main thread.
-const store = new Store();
-
-// Open file dialog and save selections by key.
-ipcMain.on(
-  CHANNELS.SELECT_FILE,
-  async (event, key: string, isDirectory: boolean) => {
-    dialog
-      .showOpenDialog({
-        properties: [isDirectory ? 'openDirectory' : 'openFile'],
-      })
-      .then((file) => {
-        if (file.filePaths.length > 0) {
-          const filePath = file.filePaths[0];
-          const fileName = filePath.split('/').at(-1);
-
-          store.set(key, filePath);
-          event.reply(CHANNELS.FILE_SELECTED, key, fileName);
-        }
-      })
-      .catch((err) => console.error(err));
-  }
-);
-
-ipcMain.on(CHANNELS.JUDGE, async (event) => {
-  const source = store.get('source', null) as string;
-  const data = store.get('data', null) as string;
-
-  // TODO: warn user
-  if (source == null || data == null) {
-    return;
-  }
-
-  cpp
-    .runFile(source, { stdin: 'test' })
-    .then((res) => {
-      console.log(res);
-    })
-    .catch((err) => {
-      console.error(err);
-    });
-});
+ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
+ipcMain.on(CHANNELS.JUDGE, judge);
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');

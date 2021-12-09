@@ -58,7 +58,7 @@ export default function Home() {
         isDir
       />
       <Button variant="primary" onClick={judge}>
-        Judge
+        Judge!
       </Button>
     </Container>
   );

@@ -6,9 +6,9 @@ declare global {
   interface Window {
     electron: {
       ipcRenderer: {
-        on: (listener: string, func: any) => void;
-        once: (listener: string, func: any) => void;
-        removeListener: (listener: string, func: any) => void;
+        on: (listener: string, func: unknown) => void;
+        once: (listener: string, func: unknown) => void;
+        removeListener: (listener: string, func: unknown) => void;
         setFile: (key: string, isDirectory: boolean) => void;
         judge: () => void;
       };
