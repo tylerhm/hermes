@@ -3,10 +3,12 @@
 import Store from 'electron-store';
 import { c, cpp, python, java } from 'compile-run';
 import { dialog } from 'electron';
+import { exec } from 'child_process';
 import CHANNELS from './channels';
 
 const find = require('find');
 const read = require('read-file');
+const write = require('write');
 
 // Store for the main thread. Get rid of old data
 const store = new Store();
@@ -52,6 +54,14 @@ const getFileContents = (absPath: string) => {
     read(absPath, { normalize: true }, (err: Error, buffer: string) => {
       if (err != null) reject(err);
       resolve(buffer);
+    });
+  });
+};
+
+const check = (input: string, userOut: string, judgeOut: string) => {
+  return new Promise((resolve) => {
+    exec(`apollo ${input} ${userOut} ${judgeOut} -v`, (err, stdout, stderr) => {
+      resolve(stdout);
     });
   });
 };
@@ -105,21 +115,26 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   inputs.forEach(async (input) => {
+    const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
+    const inputData = await getFileContents(inputPath);
     const outputPath = input.concat('.out');
     const outputData = await getFileContents(outputPath);
-    runner?.runFile(
-      source,
-      { stdin: await getFileContents(inputPath) },
-      (err, res) => {
-        console.log({
-          Case: input,
-          Output: res?.stdout,
-          JudgeOut: outputData,
-          Error: err,
-        });
-      }
-    );
+    runner?.runFile(source, { stdin: inputData }, async (err, res) => {
+      const userOutPath = `tmp/${inputId}.userOut`;
+      write.sync(userOutPath, res?.stdout);
+      const verdict = await check(inputPath, userOutPath, outputPath);
+      console.log({
+        Case: input,
+        Input: inputData,
+        Output: res?.stdout,
+        JudgeOut: outputData,
+        CPUTime: res?.cpuUsage,
+        MemoryUsed: res?.memoryUsage,
+        Error: err,
+        Verdict: verdict,
+      });
+    });
   });
 
   event.reply(CHANNELS.DONE_JUDGING);
