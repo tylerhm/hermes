@@ -2,10 +2,11 @@
 
 import Store from 'electron-store';
 import { c, cpp, python, java } from 'compile-run';
-import { exec } from 'child_process';
 import { dialog } from 'electron';
 import CHANNELS from './channels';
-import runByOs from './osSpecific';
+
+const find = require('find');
+const read = require('read-file');
 
 // Store for the main thread. Get rid of old data
 const store = new Store();
@@ -38,35 +39,19 @@ const getExtension = (path: string) => {
 };
 
 const findByExtension = (dataDir: string, ext: string) => {
-  const find = `*.${ext}`;
-  const findLinux = new Promise((resolve, reject) => {
-    const command = `find ${dataDir} -name "${find}"`;
-    const parse = (stdout: string) => {
-      return stdout.split('\n').slice(0, -1);
-    };
-    exec(command, (err, stdout, stderr) => {
-      if (err != null) reject(stderr);
-      resolve(parse(stdout));
+  const search = new RegExp(`.*\\.${ext}`, 'g');
+  return new Promise((resolve) => {
+    find.file(search, dataDir, resolve);
+  });
+};
+
+const getFileContents = (absPath: string) => {
+  return new Promise((resolve, reject) => {
+    read(absPath, { normalize: true }, (err: Error, buffer: string) => {
+      if (err != null) reject(err);
+      resolve(buffer);
     });
   });
-
-  const findWin = new Promise((resolve, reject) => {
-    const command = `dir ${dataDir} "${find}" \b`;
-    const parse = (stdout: string) => {
-      return stdout
-        .split('\n')
-        .slice(0, -1)
-        .map((file) => {
-          return `${dataDir}/${file}`;
-        });
-    };
-    exec(command, (err, stdout, stderr) => {
-      if (err != null) reject(stderr);
-      resolve(parse(stdout));
-    });
-  });
-
-  return runByOs(findLinux, findWin) as Promise<string>;
 };
 
 export const judge = async (event: Electron.IpcMainEvent) => {
@@ -79,14 +64,11 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   // Get inputs and outputs from data dir
-  const inputs = await findByExtension(data, 'in');
-  const outputs = await findByExtension(data, 'out');
-
-  console.log(inputs);
-  console.log(outputs);
+  const inputs = (await findByExtension(data, 'in')) as Array<string>;
+  // const outputs = (await findByExtension(data, 'out')) as Array<string>;
 
   const ext = getExtension(source);
-  let runner;
+  let runner = cpp;
   switch (ext) {
     case 'c':
       runner = c;
@@ -100,17 +82,19 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     case 'py':
       runner = python;
       break;
+    // TODO: warn user
     default:
-      runner = null;
   }
 
-  // TODO: Warn user
-  if (runner == null) {
-    return;
-  }
-
-  const res = await runner.runFile(source, { stdin: 'test' });
-  console.log(res);
+  inputs.forEach(async (input) => {
+    runner?.runFile(
+      source,
+      { stdin: (await getFileContents(input)) as string },
+      (err, res) => {
+        console.log({ err, res });
+      }
+    );
+  });
 
   event.reply(CHANNELS.DONE_JUDGING);
 };
