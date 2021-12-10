@@ -12,6 +12,10 @@ const read = require('read-file');
 const store = new Store();
 store.clear();
 
+const getFileNameFromPath = (filePath: string) => {
+  return filePath.split('\\').pop()?.split('/').pop();
+};
+
 // Open file dialog and save selections by key.
 export const selectFile = async (
   event: Electron.IpcMainEvent,
@@ -25,10 +29,8 @@ export const selectFile = async (
     .then((file) => {
       if (file.filePaths.length > 0) {
         const filePath = file.filePaths[0];
-        const fileName = filePath.split('/').at(-1);
-
         store.set(key, filePath);
-        event.reply(CHANNELS.FILE_SELECTED, key, fileName);
+        event.reply(CHANNELS.FILE_SELECTED, key, getFileNameFromPath(filePath));
       }
     })
     .catch((err) => console.error(err));
@@ -40,13 +42,13 @@ const getExtension = (path: string) => {
 
 const findByExtension = (dataDir: string, ext: string) => {
   const search = new RegExp(`.*\\.${ext}`, 'g');
-  return new Promise((resolve) => {
+  return new Promise<Array<string>>((resolve) => {
     find.file(search, dataDir, resolve);
   });
 };
 
 const getFileContents = (absPath: string) => {
-  return new Promise((resolve, reject) => {
+  return new Promise<string>((resolve, reject) => {
     read(absPath, { normalize: true }, (err: Error, buffer: string) => {
       if (err != null) reject(err);
       resolve(buffer);
@@ -64,8 +66,24 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   // Get inputs and outputs from data dir
-  const inputs = (await findByExtension(data, 'in')) as Array<string>;
-  // const outputs = (await findByExtension(data, 'out')) as Array<string>;
+  const inputs = (await findByExtension(data, 'in')).map((path) => {
+    return path.split('.')[0];
+  });
+  const outputs = (await findByExtension(data, 'out')).map((path) => {
+    return path.split('.')[0];
+  });
+
+  const allCasesValid = inputs.every((path) => {
+    return outputs.includes(path);
+  });
+
+  if (!allCasesValid) {
+    event.reply(CHANNELS.INVALID_JUDGE_DATA);
+    return;
+  }
+
+  // Begin judging
+  event.reply(CHANNELS.FOUND_CASES);
 
   const ext = getExtension(source);
   let runner = cpp;
@@ -87,11 +105,19 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   inputs.forEach(async (input) => {
+    const inputPath = input.concat('.in');
+    const outputPath = input.concat('.out');
+    const outputData = await getFileContents(outputPath);
     runner?.runFile(
       source,
-      { stdin: (await getFileContents(input)) as string },
+      { stdin: await getFileContents(inputPath) },
       (err, res) => {
-        console.log({ err, res });
+        console.log({
+          Case: input,
+          Output: res?.stdout,
+          JudgeOut: outputData,
+          Error: err,
+        });
       }
     );
   });
