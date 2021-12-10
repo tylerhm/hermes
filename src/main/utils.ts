@@ -60,9 +60,12 @@ const getFileContents = (absPath: string) => {
 
 const check = (input: string, userOut: string, judgeOut: string) => {
   return new Promise((resolve) => {
-    exec(`apollo ${input} ${userOut} ${judgeOut} -v`, (err, stdout, stderr) => {
-      resolve(stdout);
-    });
+    exec(
+      `python3 -m apollo ${input} ${userOut} ${judgeOut} -v`,
+      (err, stdout, stderr) => {
+        resolve(`${err}\n${stdout}\n${stderr}`);
+      }
+    );
   });
 };
 
@@ -123,6 +126,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     runner?.runFile(source, { stdin: inputData }, async (err, res) => {
       const userOutPath = `tmp/${inputId}.userOut`;
       write.sync(userOutPath, res?.stdout);
+
       const verdict = await check(inputPath, userOutPath, outputPath);
       console.log({
         Case: input,
