@@ -14,6 +14,7 @@ import path from 'path';
 import { app, BrowserWindow, shell, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
+import del from 'del';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
@@ -95,6 +96,7 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
+    del.sync(['tmp/']);
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);

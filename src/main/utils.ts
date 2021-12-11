@@ -58,14 +58,15 @@ const getFileContents = (absPath: string) => {
   });
 };
 
+type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE';
 const check = (input: string, userOut: string, judgeOut: string) => {
-  return new Promise((resolve) => {
-    exec(
-      `python3 -m apollo ${input} ${userOut} ${judgeOut} -v`,
-      (err, stdout, stderr) => {
-        resolve(`${err}\n${stdout}\n${stderr}`);
-      }
-    );
+  return new Promise<VerdictType>((resolve) => {
+    exec(`python3 -m apollo ${input} ${userOut} ${judgeOut}`, (err, stdout) => {
+      if (err) resolve('RTE');
+      stdout.replace('\\r', '');
+      const res = stdout.split('\n')[0].split(':')[0] as VerdictType;
+      resolve(res);
+    });
   });
 };
 
@@ -117,28 +118,43 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     default:
   }
 
+  // TODO: Get from UI
+  const TIME_LIMIT = 1000000;
+
   inputs.forEach(async (input) => {
     const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
     const inputData = await getFileContents(inputPath);
     const outputPath = input.concat('.out');
     const outputData = await getFileContents(outputPath);
-    runner?.runFile(source, { stdin: inputData }, async (err, res) => {
-      const userOutPath = `tmp/${inputId}.userOut`;
-      write.sync(userOutPath, res?.stdout);
+    runner?.runFile(
+      source,
+      { stdin: inputData, timeout: 2 * TIME_LIMIT },
+      async (err, res) => {
+        if (res == null) {
+          // TODO: Handle compile error
+          return;
+        }
 
-      const verdict = await check(inputPath, userOutPath, outputPath);
-      console.log({
-        Case: input,
-        Input: inputData,
-        Output: res?.stdout,
-        JudgeOut: outputData,
-        CPUTime: res?.cpuUsage,
-        MemoryUsed: res?.memoryUsage,
-        Error: err,
-        Verdict: verdict,
-      });
-    });
+        const userOutPath = `tmp/${inputId}.userOut`;
+        write.sync(userOutPath, res?.stdout);
+
+        let verdict: VerdictType;
+        if (res.cpuUsage > TIME_LIMIT) verdict = 'TLE';
+        else verdict = await check(inputPath, userOutPath, outputPath);
+
+        console.log({
+          Case: input,
+          Input: inputData,
+          Output: res.stdout,
+          JudgeOut: outputData,
+          CPUTime: res.cpuUsage,
+          MemoryUsed: res.memoryUsage,
+          Error: err,
+          Verdict: verdict,
+        });
+      }
+    );
   });
 
   event.reply(CHANNELS.DONE_JUDGING);
