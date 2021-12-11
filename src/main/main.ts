@@ -18,7 +18,7 @@ import del from 'del';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
-import { selectFile, judge } from './utils';
+import { selectFile, judge } from './runner/judge';
 
 export default class AppUpdater {
   constructor() {
