@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react';
-import { Button } from 'antd';
+import { Button, Space } from 'antd';
 import CHANNELS from './channels';
 import { FileKeyType } from './Types';
 import FileSelectionRow from './FileSelectionRow';
+import NumberSelectionRow from './NumberSelectionRow';
 
 type FileData = {
   [K in FileKeyType]?: string;
@@ -17,7 +18,6 @@ const FILE_KEYS = {
 
 export default function Home() {
   const [fileInfo, setFileInfo] = useState<FileData>({});
-  // const [isSingleTestCase, setIsSingleTestCase] = useState<boolean>(false);
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -40,24 +40,37 @@ export default function Home() {
     window.electron.ipcRenderer.setFile(key, key === FILE_KEYS.DATA);
   };
 
+  const onChangeTimeLimit = (limit: number) => {
+    window.electron.ipcRenderer.setTimeLimit(limit);
+  };
+
   const judge = () => {
     window.electron.ipcRenderer.judge();
   };
 
   return (
     <div style={{ width: '100vw', height: '100vh', margin: '1em' }}>
-      <FileSelectionRow
-        fileKey="source"
-        name={fileInfo.source}
-        onClick={onSelectFile}
-      />
-      <FileSelectionRow
-        fileKey="data"
-        name={fileInfo.data}
-        onClick={onSelectFile}
-        isDir
-      />
-      <Button onClick={judge}>Judge!</Button>
+      <Space direction="vertical" style={{ width: '100%' }}>
+        <FileSelectionRow
+          label="Source"
+          placeholder="Select file"
+          value={fileInfo.source}
+          onClick={() => onSelectFile('source')}
+        />
+        <FileSelectionRow
+          label="Data"
+          placeholder="Select directory"
+          value={fileInfo.data}
+          onClick={() => onSelectFile('data')}
+        />
+        <NumberSelectionRow
+          label="Time Limit"
+          min={1}
+          defaultValue={1}
+          onChange={onChangeTimeLimit}
+        />
+        <Button onClick={judge}>Judge!</Button>
+      </Space>
     </div>
   );
 }

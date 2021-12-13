@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('electron', {
     setFile(key, isDirectory) {
       ipcRenderer.send(CHANNELS.SELECT_FILE, key, isDirectory);
     },
+    setTimeLimit(limit) {
+      ipcRenderer.send(CHANNELS.SET_TIME_LIMIT, limit);
+    },
     judge() {
       ipcRenderer.send(CHANNELS.JUDGE);
     },

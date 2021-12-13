@@ -1,31 +1,19 @@
 import { Row, Col, Button } from 'antd';
-import { FileKeyType } from './Types';
 
 interface Props {
-  fileKey: FileKeyType;
-  name: string | undefined;
-  onClick: (key: FileKeyType) => void;
-  isDir?: boolean;
+  label: string;
+  placeholder?: string;
+  value?: string | undefined;
+  onClick: () => void;
 }
 
-const FileSelectionRow = ({ fileKey, name, onClick, isDir }: Props) => {
-  const capitalizeFirstLetter = (word: string) => {
-    if (word == null) return null;
-    return word.charAt(0).toUpperCase() + word.slice(1);
-  };
-
-  const fileType = isDir ? 'Directory' : 'File';
-
+const FileSelectionRow = ({ label, placeholder, value, onClick }: Props) => {
   return (
-    <Row className="align-items-center" style={{ margin: '0.1em' }}>
-      <Col xs={5}>{`${capitalizeFirstLetter(fileKey)} ${fileType}:`}</Col>
-      <Col xs={7}>
-        <Button
-          value="small"
-          style={{ width: '100%' }}
-          onClick={() => onClick(fileKey)}
-        >
-          {name ?? `Select ${fileType}`}
+    <Row style={{ width: '100%' }}>
+      <Col span={10}>{label}</Col>
+      <Col span={14}>
+        <Button value="small" style={{ minWidth: '60%' }} onClick={onClick}>
+          {value ?? placeholder}
         </Button>
       </Col>
     </Row>
@@ -33,7 +21,8 @@ const FileSelectionRow = ({ fileKey, name, onClick, isDir }: Props) => {
 };
 
 FileSelectionRow.defaultProps = {
-  isDir: false,
+  placeholder: '',
+  value: null,
 };
 
 export default FileSelectionRow;

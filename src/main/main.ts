@@ -18,7 +18,7 @@ import del from 'del';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
-import { selectFile, judge } from './runner/judge';
+import { selectFile, judge, setTimeLimit } from './runner/judge';
 
 export default class AppUpdater {
   constructor() {
@@ -31,6 +31,7 @@ export default class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
+ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
 ipcMain.on(CHANNELS.JUDGE, judge);
 
 if (process.env.NODE_ENV === 'production') {

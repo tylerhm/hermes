@@ -38,6 +38,14 @@ export const selectFile = async (
     .catch((err) => console.error(err));
 };
 
+// Set the time limit in the store
+export const setTimeLimit = async (
+  _event: Electron.IpcMainEvent,
+  limit: number
+) => {
+  store.set('timeLimit', limit);
+};
+
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
 const check = (input: string, userOut: string, judgeOut: string) => {
   return new Promise<VerdictType>((resolve) => {
@@ -53,6 +61,8 @@ const check = (input: string, userOut: string, judgeOut: string) => {
 export const judge = async (event: Electron.IpcMainEvent) => {
   const source = store.get('source', null) as string;
   const data = store.get('data', null) as string;
+  // Convert to millis
+  const timeLimit = (store.get('timeLimit', 1) as number) * 1000;
 
   // TODO: warn user
   if (source == null || data == null) {
@@ -82,9 +92,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   const ext = getExtension(source);
   const lang = getLang(ext);
 
-  // TODO: Get from UI
-  const TIME_LIMIT = 1000;
-
   // Compile the code
   const compiledPath = await compile(source, lang);
 
@@ -99,12 +106,12 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       lang,
       inputPath,
       userOutputPath,
-      TIME_LIMIT * 2
+      timeLimit * 2
     );
 
     let verdict: VerdictType;
     if (runTime === -1) verdict = 'RTE';
-    else if (runTime > TIME_LIMIT) verdict = 'TLE';
+    else if (runTime > timeLimit) verdict = 'TLE';
     else verdict = await check(inputPath, userOutputPath, judgeOutputPath);
 
     console.log({
