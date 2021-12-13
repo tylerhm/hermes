@@ -13,7 +13,7 @@ export const getExtension = (path: string) => {
 
 // Trim extension off of a string
 export const trimExtension = (fileName: string) => {
-  return fileName.split('.')[0];
+  return fileName.split('.').slice(0, -1).join('.');
 };
 
 // Find file by it's extension

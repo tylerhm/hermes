@@ -8,6 +8,7 @@ import {
   findByExtension,
   getExtension,
   getLang,
+  trimExtension,
 } from '../utils';
 import CHANNELS from '../channels';
 import compile from './compile';
@@ -60,10 +61,10 @@ export const judge = async (event: Electron.IpcMainEvent) => {
 
   // Get inputs and outputs from data dir
   const inputs = (await findByExtension(data, 'in')).map((path) => {
-    return path.split('.')[0];
+    return trimExtension(path);
   });
   const outputs = (await findByExtension(data, 'out')).map((path) => {
-    return path.split('.')[0];
+    return trimExtension(path);
   });
 
   const allCasesValid = inputs.every((path) => {
@@ -87,7 +88,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   // Compile the code
   const compiledPath = await compile(source, lang);
 
-  inputs.forEach(async (input) => {
+  inputs.forEach(async (input, index) => {
     const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
     const judgeOutputPath = input.concat('.out');
@@ -107,7 +108,8 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     else verdict = await check(inputPath, userOutputPath, judgeOutputPath);
 
     console.log({
-      Case: input,
+      Case: inputId,
+      index,
       Runtime: runTime,
       Verdict: verdict,
     });
