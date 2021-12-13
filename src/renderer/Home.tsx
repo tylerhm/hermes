@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Button, Container } from 'react-bootstrap';
+import { Button } from 'antd';
 import CHANNELS from './channels';
 import { FileKeyType } from './Types';
 import FileSelectionRow from './FileSelectionRow';
@@ -45,7 +45,7 @@ export default function Home() {
   };
 
   return (
-    <Container style={{ margin: '1em' }}>
+    <div style={{ width: '100vw', height: '100vh', margin: '1em' }}>
       <FileSelectionRow
         fileKey="source"
         name={fileInfo.source}
@@ -57,9 +57,7 @@ export default function Home() {
         onClick={onSelectFile}
         isDir
       />
-      <Button variant="primary" onClick={judge}>
-        Judge!
-      </Button>
-    </Container>
+      <Button onClick={judge}>Judge!</Button>
+    </div>
   );
 }

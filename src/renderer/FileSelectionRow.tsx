@@ -1,4 +1,4 @@
-import { Row, Col, Button } from 'react-bootstrap';
+import { Row, Col, Button } from 'antd';
 import { FileKeyType } from './Types';
 
 interface Props {
@@ -21,8 +21,7 @@ const FileSelectionRow = ({ fileKey, name, onClick, isDir }: Props) => {
       <Col xs={5}>{`${capitalizeFirstLetter(fileKey)} ${fileType}:`}</Col>
       <Col xs={7}>
         <Button
-          variant="secondary"
-          size="sm"
+          value="small"
           style={{ width: '100%' }}
           onClick={() => onClick(fileKey)}
         >
