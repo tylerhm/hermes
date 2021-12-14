@@ -122,6 +122,10 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
+  let results = inputs.reduce((curRes, path) => {
+    return { ...curRes, [getFileNameFromPath(path)]: 'UNKNOWN' };
+  }, {});
+
   inputs.forEach(async (input, index) => {
     const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
@@ -148,11 +152,12 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       Verdict: verdict,
     });
 
-    event.reply(CHANNELS.CASE_JUDGED, {
-      inputId,
-      runTime,
-      verdict,
-    });
+    results = {
+      ...results,
+      [inputId]: verdict,
+    };
+
+    event.reply(CHANNELS.CASE_JUDGED, results);
   });
 
   event.reply(CHANNELS.DONE_JUDGING);

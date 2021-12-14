@@ -6,6 +6,7 @@ import FileSelectionRow from './FileSelectionRow';
 import NumberSelectionRow from './NumberSelectionRow';
 import eventHandler from './eventHandler';
 import JudgeButton from './JudgeButton';
+import Results from './Results';
 
 type FileData = {
   [K in FileKeyType]?: string;
@@ -71,6 +72,7 @@ export default function Home() {
           onChange={onChangeTimeLimit}
         />
         <JudgeButton />
+        <Results />
       </Space>
     </div>
   );
