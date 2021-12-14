@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Button, Space } from 'antd';
+import { Space } from 'antd';
 import CHANNELS from './channels';
 import { FileKeyType } from './Types';
 import FileSelectionRow from './FileSelectionRow';
 import NumberSelectionRow from './NumberSelectionRow';
+import eventHandler from './eventHandler';
+import JudgeButton from './JudgeButton';
 
 type FileData = {
   [K in FileKeyType]?: string;
@@ -26,30 +28,28 @@ export default function Home() {
   };
 
   useEffect(() => {
-    window.electron.ipcRenderer.on(CHANNELS.FILE_SELECTED, updateFileName);
+    eventHandler.on(CHANNELS.FILE_SELECTED, updateFileName);
 
     return () => {
-      window.electron.ipcRenderer.removeListener(
-        CHANNELS.FILE_SELECTED,
-        updateFileName
-      );
+      eventHandler.removeListener(CHANNELS.FILE_SELECTED, updateFileName);
     };
   }, [updateFileName]);
 
   const onSelectFile = (key: FileKeyType) => {
-    window.electron.ipcRenderer.setFile(key, key === FILE_KEYS.DATA);
+    eventHandler.setFile(key, key === FILE_KEYS.DATA);
   };
 
   const onChangeTimeLimit = (limit: number) => {
-    window.electron.ipcRenderer.setTimeLimit(limit);
+    eventHandler.setTimeLimit(limit);
   };
-
-  const judge = () => {
-    window.electron.ipcRenderer.judge();
-  };
-
   return (
-    <div style={{ width: '100vw', height: '100vh', margin: '1em' }}>
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        padding: '1em',
+      }}
+    >
       <Space direction="vertical" style={{ width: '100%' }}>
         <FileSelectionRow
           label="Source"
@@ -67,9 +67,10 @@ export default function Home() {
           label="Time Limit"
           min={1}
           defaultValue={1}
+          units="seconds"
           onChange={onChangeTimeLimit}
         />
-        <Button onClick={judge}>Judge!</Button>
+        <JudgeButton />
       </Space>
     </div>
   );

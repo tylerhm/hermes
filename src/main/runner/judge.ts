@@ -59,13 +59,18 @@ const check = (input: string, userOut: string, judgeOut: string) => {
 };
 
 export const judge = async (event: Electron.IpcMainEvent) => {
-  const source = store.get('source', null) as string;
-  const data = store.get('data', null) as string;
+  /*
+   * DATA COLLECTION
+   */
+  event.reply(CHANNELS.BEGIN_COLLECT_DATA);
+
+  const source = store.get('source', null) as string | null;
+  const data = store.get('data', null) as string | null;
   // Convert to millis
   const timeLimit = (store.get('timeLimit', 1) as number) * 1000;
 
-  // TODO: warn user
   if (source == null || data == null) {
+    event.reply(CHANNELS.MISSING_INFO);
     return;
   }
 
@@ -82,18 +87,40 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   });
 
   if (!allCasesValid) {
-    event.reply(CHANNELS.INVALID_JUDGE_DATA);
+    event.reply(CHANNELS.INVALID_DATA);
     return;
   }
 
-  // Begin judging
-  event.reply(CHANNELS.FOUND_CASES);
+  const inputIds = inputs.map((path) => {
+    return getFileNameFromPath(path);
+  });
+
+  event.reply(CHANNELS.DONE_COLLECT_DATA, inputIds);
+
+  /*
+   * COMPILATION
+   */
+  event.reply(CHANNELS.BEGIN_COMPILING);
 
   const ext = getExtension(source);
   const lang = getLang(ext);
 
   // Compile the code
-  const compiledPath = await compile(source, lang);
+  let compiledPath: string;
+  try {
+    compiledPath = await compile(source, lang);
+  } catch (err) {
+    console.error(err);
+    event.reply(CHANNELS.COMPILATION_ERROR);
+    return;
+  }
+
+  event.reply(CHANNELS.DONE_COMPILING);
+
+  /*
+   * JUDGING
+   */
+  event.reply(CHANNELS.BEGIN_JUDGING);
 
   inputs.forEach(async (input, index) => {
     const inputId = getFileNameFromPath(input);
@@ -119,6 +146,12 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       index,
       Runtime: runTime,
       Verdict: verdict,
+    });
+
+    event.reply(CHANNELS.CASE_JUDGED, {
+      inputId,
+      runTime,
+      verdict,
     });
   });
 

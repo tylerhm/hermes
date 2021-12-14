@@ -5,6 +5,7 @@ interface Props {
   min: number;
   max?: number;
   defaultValue: number;
+  units: string;
   onChange: (newNumber: number) => void;
 }
 
@@ -13,6 +14,7 @@ const NumberSelectionRow = ({
   min,
   max,
   defaultValue,
+  units,
   onChange,
 }: Props) => {
   return (
@@ -24,6 +26,7 @@ const NumberSelectionRow = ({
           max={max}
           defaultValue={defaultValue}
           onChange={onChange}
+          addonAfter={units}
         />
       </Col>
     </Row>
