@@ -77,6 +77,7 @@ const createWindow = async () => {
     width: 450,
     height: 600,
     icon: getAssetPath('icon.png'),
+    autoHideMenuBar: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
     },
