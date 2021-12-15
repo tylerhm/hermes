@@ -50,9 +50,10 @@ const RESULT_META: ResultsMetaType = {
 };
 
 type MessageProps = {
+  caseID: string;
   messages: Array<string>;
 };
-const MessageSplitter = ({ messages }: MessageProps) => {
+const MessageSplitter = ({ caseID, messages }: MessageProps) => {
   return (
     <div
       style={{
@@ -61,7 +62,7 @@ const MessageSplitter = ({ messages }: MessageProps) => {
       }}
     >
       {messages.map((message) => (
-        <div>{message}</div>
+        <div key={`${caseID}-${message}`}>{message}</div>
       ))}
     </div>
   );
@@ -85,7 +86,9 @@ const Results = () => {
         return (
           <Popover
             title={caseID}
-            content={<MessageSplitter messages={result.messages} />}
+            content={
+              <MessageSplitter caseID={caseID} messages={result.messages} />
+            }
             key={caseID}
           >
             <div
