@@ -11,6 +11,10 @@ const useResults = () => {
   const [results, setResults] = useState<ResultsType>({});
 
   useEffect(() => {
+    const resetResults = () => {
+      setResults({});
+    };
+
     const dataRecieved = (dataIds: Array<string>) => {
       setResults(
         dataIds.reduce((curRes, id) => {
@@ -29,6 +33,7 @@ const useResults = () => {
       setResults(newResults);
     };
 
+    eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, resetResults);
     eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataRecieved);
     eventHandler.on(CHANNELS.CASE_JUDGED, caseJudged);
 
