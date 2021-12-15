@@ -22,7 +22,7 @@ const useResults = () => {
             ...curRes,
             [id]: {
               verdict: 'UNKNOWN',
-              messages: [''],
+              messages: [],
             },
           };
         }, {})

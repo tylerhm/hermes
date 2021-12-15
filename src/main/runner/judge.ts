@@ -49,7 +49,7 @@ export const setTimeLimit = async (
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
 type Response = {
   verdict: VerdictType;
-  messages: Array<string | undefined>;
+  messages: Array<string>;
 };
 const check = (input: string, userOut: string, judgeOut: string) => {
   return new Promise<Response>((resolve) => {
@@ -62,7 +62,9 @@ const check = (input: string, userOut: string, judgeOut: string) => {
       const parsed = stdout.replaceAll(/\r/g, '');
       const lines = parsed.split('\n');
       const verdict = lines[0].split(':')[0] as VerdictType;
-      const messages = [lines[0].split(':').at(-1), ...lines.slice(1)];
+      const messages = [lines[0].split(':').at(-1) as string, ...lines.slice(1)]
+        .map((item) => item.trim())
+        .filter((item) => item !== '');
       resolve({
         verdict,
         messages,
@@ -140,7 +142,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       ...curRes,
       [getFileNameFromPath(path)]: {
         verdict: 'UNKNOWN',
-        messages: '',
+        messages: [],
       },
     };
   }, {});
