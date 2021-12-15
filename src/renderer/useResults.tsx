@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import CHANNELS from './channels';
 import eventHandler from './eventHandler';
-import { VerdictType } from './Types';
+import { Response } from './Types';
 
 type ResultsType = {
-  [id: string]: VerdictType;
+  [id: string]: Response;
 };
 
 const useResults = () => {
@@ -14,7 +14,13 @@ const useResults = () => {
     const dataRecieved = (dataIds: Array<string>) => {
       setResults(
         dataIds.reduce((curRes, id) => {
-          return { ...curRes, [id]: 'UNKNOWN' };
+          return {
+            ...curRes,
+            [id]: {
+              verdict: 'UNKNOWN',
+              messages: [''],
+            },
+          };
         }, {})
       );
     };

@@ -47,13 +47,26 @@ export const setTimeLimit = async (
 };
 
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
+type Response = {
+  verdict: VerdictType;
+  messages: Array<string | undefined>;
+};
 const check = (input: string, userOut: string, judgeOut: string) => {
-  return new Promise<VerdictType>((resolve) => {
+  return new Promise<Response>((resolve) => {
     exec(`python3 -m apollo ${input} ${userOut} ${judgeOut}`, (err, stdout) => {
-      if (err) resolve('INTERNAL_ERROR');
-      stdout.replace('\\r', '');
-      const res = stdout.split('\n')[0].split(':')[0] as VerdictType;
-      resolve(res);
+      if (err)
+        resolve({
+          verdict: 'INTERNAL_ERROR',
+          messages: [],
+        });
+      const parsed = stdout.replaceAll(/\r/g, '');
+      const lines = parsed.split('\n');
+      const verdict = lines[0].split(':')[0] as VerdictType;
+      const messages = [lines[0].split(':').at(-1), ...lines.slice(1)];
+      resolve({
+        verdict,
+        messages,
+      });
     });
   });
 };
@@ -123,7 +136,13 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   event.reply(CHANNELS.BEGIN_JUDGING);
 
   let results = inputs.reduce((curRes, path) => {
-    return { ...curRes, [getFileNameFromPath(path)]: 'UNKNOWN' };
+    return {
+      ...curRes,
+      [getFileNameFromPath(path)]: {
+        verdict: 'UNKNOWN',
+        messages: '',
+      },
+    };
   }, {});
 
   inputs.forEach(async (input, index) => {
@@ -140,21 +159,31 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       timeLimit * 2
     );
 
-    let verdict: VerdictType;
-    if (runTime === -1) verdict = 'RTE';
-    else if (runTime > timeLimit) verdict = 'TLE';
-    else verdict = await check(inputPath, userOutputPath, judgeOutputPath);
+    let response: Response;
+    if (runTime === -1)
+      response = {
+        verdict: 'RTE',
+        messages: ['Runtime error.'],
+      };
+    else if (runTime > timeLimit)
+      response = {
+        verdict: 'TLE',
+        messages: [
+          `Finished executing or timed out at ${runTime} milliseconds.`,
+        ],
+      };
+    else response = await check(inputPath, userOutputPath, judgeOutputPath);
 
     console.log({
       Case: inputId,
       index,
       Runtime: runTime,
-      Verdict: verdict,
+      Verdict: response,
     });
 
     results = {
       ...results,
-      [inputId]: verdict,
+      [inputId]: response,
     };
 
     event.reply(CHANNELS.CASE_JUDGED, results);

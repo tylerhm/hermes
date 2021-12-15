@@ -3,7 +3,9 @@ import {
   ClockCircleOutlined,
   CloseOutlined,
   ExclamationOutlined,
+  FormOutlined,
   LoadingOutlined,
+  SettingOutlined,
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Button, { ButtonType } from 'antd-button-color';
@@ -37,6 +39,32 @@ const RESULT_META: ResultsMetaType = {
     type: 'dark',
     icon: <ExclamationOutlined />,
   },
+  PE: {
+    type: 'warning',
+    icon: <FormOutlined />,
+  },
+  INTERNAL_ERROR: {
+    type: 'danger',
+    icon: <SettingOutlined />,
+  },
+};
+
+type MessageProps = {
+  messages: Array<string>;
+};
+const MessageSplitter = ({ messages }: MessageProps) => {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+      }}
+    >
+      {messages.map((message) => (
+        <div>{message}</div>
+      ))}
+    </div>
+  );
 };
 
 const Results = () => {
@@ -53,9 +81,13 @@ const Results = () => {
         gap: '1em',
       }}
     >
-      {Object.entries(results).map(([caseID, status]) => {
+      {Object.entries(results).map(([caseID, result]) => {
         return (
-          <Popover title={caseID} key={caseID}>
+          <Popover
+            title={caseID}
+            content={<MessageSplitter messages={result.messages} />}
+            key={caseID}
+          >
             <div
               style={{
                 display: 'flex',
@@ -65,9 +97,9 @@ const Results = () => {
               }}
             >
               <Button
-                type={RESULT_META[status].type}
+                type={RESULT_META[result.verdict].type}
                 shape="circle"
-                icon={RESULT_META[status].icon}
+                icon={RESULT_META[result.verdict].icon}
               />
             </div>
           </Popover>
