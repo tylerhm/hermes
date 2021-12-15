@@ -60,7 +60,7 @@ const MessageSplitter = ({ messages }: MessageProps) => {
         flexDirection: 'column',
       }}
     >
-      {messages.map((message) => (
+      {messages?.map((message) => (
         <div>{message}</div>
       ))}
     </div>
