@@ -75,6 +75,7 @@ const Results = () => {
     <div
       style={{
         marginTop: '2em',
+        marginBottom: '1em',
         display: 'flex',
         flexDirection: 'row',
         justifyContent: 'center',
