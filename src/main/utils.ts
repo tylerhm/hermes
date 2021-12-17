@@ -1,14 +1,19 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
+import del from 'del';
+import find from 'find';
+import makeDir from 'make-dir';
+import path from 'path';
+import envPaths from './envPaths';
 
-const find = require('find');
+const paths = envPaths('hermes', { suffix: 'ucf' });
 
 export const getFileNameFromPath = (filePath: string) => {
   return filePath.split('\\').pop()?.split('/').pop() as string;
 };
 
 // Get the extension from a string
-export const getExtension = (path: string) => {
-  return path.split('.').pop() as string;
+export const getExtension = (filePath: string) => {
+  return filePath.split('.').pop() as string;
 };
 
 // Trim extension off of a string
@@ -49,4 +54,16 @@ export const langSpecific = (
   options: LangSpecificOptionsType
 ) => {
   return options[lang];
+};
+
+export const touchCache = () => {
+  makeDir(paths.cache);
+};
+
+export const clearCache = () => {
+  del.sync([paths.cache], { force: true });
+};
+
+export const getCachePath = (fileName?: string) => {
+  return fileName ? path.join(paths.cache, fileName) : paths.cache;
 };

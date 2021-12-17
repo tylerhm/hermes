@@ -9,6 +9,7 @@ import {
   getExtension,
   getLang,
   trimExtension,
+  getCachePath,
 } from '../utils';
 import CHANNELS from '../channels';
 import compile from './compile';
@@ -151,7 +152,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
     const judgeOutputPath = input.concat('.out');
-    const userOutputPath = `tmp/${inputId}.userOut`;
+    const userOutputPath = getCachePath(`${inputId}.userOut`);
 
     const runTime = await run(
       compiledPath,

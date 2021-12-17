@@ -6,7 +6,6 @@ logs
 pids
 *.pid
 *.seed
-tmp/
 
 # Coverage directory used by tools like istanbul
 coverage

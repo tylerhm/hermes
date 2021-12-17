@@ -1,5 +1,10 @@
 import { exec } from 'child_process';
-import { getFileNameFromPath, langSpecific, LangType } from '../utils';
+import {
+  getCachePath,
+  getFileNameFromPath,
+  langSpecific,
+  LangType,
+} from '../utils';
 
 // Run a binary. Resolves as runtime, or -1 if RTE
 const run = (
@@ -14,7 +19,7 @@ const run = (
   const command = langSpecific(lang, {
     c: `${binPath} < ${inputPath} > ${outputPath}`,
     cpp: `${binPath} < ${inputPath} > ${outputPath}`,
-    java: `java -cp tmp ${binName} < ${inputPath} > ${outputPath}`,
+    java: `java -cp ${getCachePath()} ${binName} < ${inputPath} > ${outputPath}`,
     py: `python3 ${binPath} < ${inputPath} > ${outputPath}`,
   }) as string;
 

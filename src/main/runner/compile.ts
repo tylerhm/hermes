@@ -1,6 +1,6 @@
 import { exec } from 'child_process';
-import makeDir from 'make-dir';
 import {
+  getCachePath,
   getFileNameFromPath,
   langSpecific,
   LangType,
@@ -11,19 +11,17 @@ import {
 const compile = async (sourcePath: string, lang: LangType) => {
   const sourceName = trimExtension(getFileNameFromPath(sourcePath));
 
-  await makeDir('tmp');
-
   const command = langSpecific(lang, {
-    cpp: `g++ ${sourcePath} -O2 -o tmp/${sourceName}`,
-    c: `gcc ${sourcePath} -O2 -o tmp/${sourceName}`,
-    java: `javac ${sourcePath} -d tmp/`,
-    py: `cp ${sourcePath} tmp/`,
+    cpp: `g++ ${sourcePath} -O2 -o ${getCachePath(sourceName)}`,
+    c: `gcc ${sourcePath} -O2 -o ${getCachePath(sourceName)}`,
+    java: `javac ${sourcePath} -d ${getCachePath()}`,
+    py: `cp ${sourcePath} ${getCachePath()}`,
   }) as string;
 
   return new Promise<string>((resolve, reject) => {
     exec(command, (err) => {
       if (err) reject(err);
-      resolve(`tmp/${sourceName}`);
+      resolve(getCachePath(sourceName));
     });
   });
 };
