@@ -1,4 +1,4 @@
-/* eslint global-require: off, no-console: off, promise/always-return: off */
+/* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
 
 import { exec } from 'child_process';
 import { dialog } from 'electron';
@@ -82,8 +82,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
 
   const source = store.get('source', null) as string | null;
   const data = store.get('data', null) as string | null;
-  // Convert to millis
-  const timeLimit = (store.get('timeLimit', 1) as number) * 1000;
+  const timeLimit = store.get('timeLimit', 1) as number;
 
   if (source == null || data == null) {
     event.reply(CHANNELS.MISSING_INFO);
@@ -148,39 +147,37 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     };
   }, {});
 
-  inputs.forEach(async (input, index) => {
+  for (let i = 0; i < inputs.length; i += 1) {
+    const input = inputs[i];
     const inputId = getFileNameFromPath(input);
     const inputPath = input.concat('.in');
     const judgeOutputPath = input.concat('.out');
     const userOutputPath = getCachePath(`${inputId}.userOut`);
 
-    const runTime = await run(
-      compiledPath,
-      lang,
-      inputPath,
-      userOutputPath,
-      timeLimit * 2
-    );
+    let response: Response = {
+      verdict: 'INTERNAL_ERROR',
+      messages: [],
+    };
 
-    let response: Response;
-    if (runTime === -1)
-      response = {
-        verdict: 'RTE',
-        messages: ['Runtime error.'],
-      };
-    else if (runTime > timeLimit)
-      response = {
-        verdict: 'TLE',
-        messages: [
-          `Finished executing or timed out at ${runTime} milliseconds.`,
-        ],
-      };
-    else response = await check(inputPath, userOutputPath, judgeOutputPath);
+    try {
+      await run(compiledPath, lang, inputPath, userOutputPath, timeLimit);
+      response = await check(inputPath, userOutputPath, judgeOutputPath);
+    } catch (err) {
+      if (err === 'TLE') {
+        response = {
+          verdict: 'TLE',
+          messages: ['Exceeded cpuTime limit.'],
+        };
+      } else if (err === 'RTE') {
+        response = {
+          verdict: 'RTE',
+          messages: ['Runtime error.'],
+        };
+      }
+    }
 
     console.log({
       Case: inputId,
-      index,
-      Runtime: runTime,
       Verdict: response,
     });
 
@@ -190,7 +187,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     };
 
     event.reply(CHANNELS.CASE_JUDGED, results);
-  });
+  }
 
   event.reply(CHANNELS.DONE_JUDGING);
 };
