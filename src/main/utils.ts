@@ -1,5 +1,6 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 import del from 'del';
+import fs from 'fs';
 import find from 'find';
 import makeDir from 'make-dir';
 import path from 'path';
@@ -61,7 +62,7 @@ export const touchCache = () => {
 };
 
 export const clearCache = () => {
-  del.sync([paths.cache], { force: true });
+  if (fs.existsSync(paths.cache)) del.sync([paths.cache], { force: true });
 };
 
 export const getCachePath = (fileName?: string) => {

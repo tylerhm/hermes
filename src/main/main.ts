@@ -35,7 +35,8 @@ ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
 ipcMain.on(CHANNELS.JUDGE, judge);
 
-// Ensure that our cache exists
+// Clear our cache, and then make sure it exists
+clearCache();
 touchCache();
 
 if (process.env.NODE_ENV === 'production') {
@@ -102,9 +103,6 @@ const createWindow = async () => {
 
   mainWindow.on('closed', () => {
     mainWindow = null;
-
-    // Don't hog space
-    clearCache();
   });
 
   const menuBuilder = new MenuBuilder(mainWindow);
