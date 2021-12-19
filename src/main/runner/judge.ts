@@ -1,5 +1,4 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
-
 import { spawn } from 'child_process';
 import { dialog } from 'electron';
 import Store from 'electron-store';
