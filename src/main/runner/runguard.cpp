@@ -29,7 +29,6 @@ int main(int argc, char **argv) {
     string inputPath(argv[5]);
     string outputPath(argv[6]);
     int timeLimit = stoi(string(argv[7]));
-    cout << timeLimit << endl;
 
     // set the process limits
     setLimit(RLIMIT_CPU, timeLimit, timeLimit + 1);

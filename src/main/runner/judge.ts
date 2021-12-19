@@ -1,8 +1,9 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
 
-import { exec } from 'child_process';
+import { spawn } from 'child_process';
 import { dialog } from 'electron';
 import Store from 'electron-store';
+import path from 'path';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -13,7 +14,6 @@ import {
 } from '../utils';
 import CHANNELS from '../channels';
 import compile from './compile';
-import run from './run';
 
 // Store for the main thread. Get rid of old data
 const store = new Store();
@@ -48,32 +48,13 @@ export const setTimeLimit = async (
 };
 
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
-type Response = {
+type ResponseType = {
   verdict: VerdictType;
   messages: Array<string>;
 };
-const check = (input: string, userOut: string, judgeOut: string) => {
-  return new Promise<Response>((resolve) => {
-    exec(`python3 -m apollo ${input} ${userOut} ${judgeOut}`, (err, stdout) => {
-      if (err)
-        resolve({
-          verdict: 'INTERNAL_ERROR',
-          messages: [],
-        });
-      const parsed = stdout.replaceAll(/\r/g, '');
-      const lines = parsed.split('\n');
-      const verdict = lines[0].split(':')[0] as VerdictType;
-      const messages = [lines[0].split(':').at(-1) as string, ...lines.slice(1)]
-        .map((item) => item.trim())
-        .filter((item) => item !== '');
-      resolve({
-        verdict,
-        messages,
-      });
-    });
-  });
+type ResultsType = {
+  [inputId: string]: ResponseType;
 };
-
 export const judge = async (event: Electron.IpcMainEvent) => {
   /*
    * DATA COLLECTION
@@ -90,15 +71,15 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   // Get inputs and outputs from data dir
-  const inputs = (await findByExtension(data, 'in')).map((path) => {
-    return trimExtension(path);
+  const inputs = (await findByExtension(data, 'in')).map((absPath) => {
+    return trimExtension(absPath);
   });
-  const outputs = (await findByExtension(data, 'out')).map((path) => {
-    return trimExtension(path);
+  const outputs = (await findByExtension(data, 'out')).map((absPath) => {
+    return trimExtension(absPath);
   });
 
-  const allCasesValid = inputs.every((path) => {
-    return outputs.includes(path);
+  const allCasesValid = inputs.every((absPath) => {
+    return outputs.includes(absPath);
   });
 
   if (!allCasesValid) {
@@ -106,8 +87,8 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
-  const inputIds = inputs.map((path) => {
-    return getFileNameFromPath(path);
+  const inputIds = inputs.map((absPath) => {
+    return getFileNameFromPath(absPath);
   });
 
   event.reply(CHANNELS.DONE_COLLECT_DATA, inputIds);
@@ -137,57 +118,62 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
-  let results = inputs.reduce((curRes, path) => {
+  const judger = spawn(path.join(__dirname, 'fastJudge'), [
+    getCachePath(),
+    getFileNameFromPath(compiledPath),
+    compiledPath,
+    lang,
+    inputIds.toString(),
+    inputs.map((id) => id.concat('.in')).toString(),
+    inputs.map((id) => id.concat('.out')).toString(),
+    timeLimit.toString(),
+    path.sep,
+    path.join(__dirname, 'runguard'),
+  ]);
+
+  // REMOVE BEFORE MERGE TO MAIN
+  // console.log(
+  //   `${path.join(
+  //     __dirname,
+  //     'fastJudge'
+  //   )} ${getCachePath()} ${getFileNameFromPath(
+  //     compiledPath
+  //   )} ${compiledPath} ${lang} ${inputIds.toString()} ${inputs
+  //     .map((id) => id.concat('.in'))
+  //     .toString()} ${inputs
+  //     .map((id) => id.concat('.out'))
+  //     .toString()} ${timeLimit.toString()} ${path.sep} ${path.join(
+  //     __dirname,
+  //     'runguard'
+  //   )}`
+  // );
+
+  const results: ResultsType = inputs.reduce((curRes, absPath) => {
     return {
       ...curRes,
-      [getFileNameFromPath(path)]: {
+      [getFileNameFromPath(absPath)]: {
         verdict: 'UNKNOWN',
         messages: [],
       },
     };
   }, {});
 
-  for (let i = 0; i < inputs.length; i += 1) {
-    const input = inputs[i];
-    const inputId = getFileNameFromPath(input);
-    const inputPath = input.concat('.in');
-    const judgeOutputPath = input.concat('.out');
-    const userOutputPath = getCachePath(`${inputId}.userOut`);
+  type MessageType = {
+    inputId: string;
+    verdict: VerdictType;
+  };
 
-    let response: Response = {
-      verdict: 'INTERNAL_ERROR',
-      messages: [],
-    };
-
-    try {
-      await run(compiledPath, lang, inputPath, userOutputPath, timeLimit);
-      response = await check(inputPath, userOutputPath, judgeOutputPath);
-    } catch (err) {
-      if (err === 'TLE') {
-        response = {
-          verdict: 'TLE',
-          messages: ['Exceeded cpuTime limit.'],
-        };
-      } else if (err === 'RTE') {
-        response = {
-          verdict: 'RTE',
-          messages: ['Runtime error.'],
-        };
-      }
-    }
-
-    console.log({
-      Case: inputId,
-      Verdict: response,
-    });
-
-    results = {
-      ...results,
-      [inputId]: response,
+  let numJudged = 0;
+  judger.stdout.on('data', (msg) => {
+    const message: MessageType = JSON.parse(msg.toString());
+    results[message.inputId] = {
+      verdict: message.verdict,
+      messages: [message.verdict],
     };
 
     event.reply(CHANNELS.CASE_JUDGED, results);
-  }
 
-  event.reply(CHANNELS.DONE_JUDGING);
+    numJudged += 1;
+    if (numJudged === inputs.length) event.reply(CHANNELS.DONE_JUDGING);
+  });
 };

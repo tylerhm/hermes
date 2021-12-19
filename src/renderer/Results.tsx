@@ -84,6 +84,8 @@ const Results = () => {
       }}
     >
       {Object.entries(results).map(([caseID, result]) => {
+        console.log(caseID);
+        console.log(result);
         return (
           <Popover
             title={caseID}
