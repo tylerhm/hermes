@@ -2,11 +2,24 @@
 
 ## Usage
 
-Hermes makes frequent use of the shell for compilation and checking. In order for this to work, you *must* have the following installed and in your PATH.
-* [Apollo](https://github.com/TylerMathis/apollo)
-* Compiler / Interpreter for your languages
+Hermes makes frequent use of the shell for compilation and checking. In order for this to work, you _must_ have the following installed and in your PATH.
+
+- [Apollo](https://github.com/TylerMathis/apollo)
+- Compiler / Interpreter for your languages
 
 ## Starting Development
+
+Ensure that you have the following dependencies
+
+- make
+- g++
+- node
+
+Install `node_modules`:
+
+```bash
+npm install
+```
 
 Start the app in the `dev` environment:
 
