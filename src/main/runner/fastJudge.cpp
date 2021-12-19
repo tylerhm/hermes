@@ -115,7 +115,8 @@ int main(int argc, char **argv) {
         cout << "{";
         cout << "\"inputId\":\"" + inputID + "\",";
         cout << "\"verdict\":\"" + verdict + "\"";
-        cout << "}" << endl;
+        cout << "}";
+        cout.flush();
     }
 
     return 0;
