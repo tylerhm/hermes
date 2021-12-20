@@ -27,8 +27,8 @@ vector<string> parseInputArray(string inp) {
 enum RETURN_CODES {
     // Apollo defined
     AC = 0,
-    WA = 1,
-    PE = 2,
+    WA = 3,
+    PE = 4,
 
     // System defined
     TLE = 152,
