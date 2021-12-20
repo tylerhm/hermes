@@ -130,23 +130,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     path.join(__dirname, 'runguard'),
   ]);
 
-  // REMOVE BEFORE MERGE TO MAIN
-  // console.log(
-  //   `${path.join(
-  //     __dirname,
-  //     'fastJudge'
-  //   )} ${getCachePath()} ${getFileNameFromPath(
-  //     compiledPath
-  //   )} ${compiledPath} ${lang} ${inputIds.toString()} ${inputs
-  //     .map((id) => id.concat('.in'))
-  //     .toString()} ${inputs
-  //     .map((id) => id.concat('.out'))
-  //     .toString()} ${timeLimit.toString()} ${path.sep} ${path.join(
-  //     __dirname,
-  //     'runguard'
-  //   )}`
-  // );
-
   const results: ResultsType = inputs.reduce((curRes, absPath) => {
     return {
       ...curRes,
