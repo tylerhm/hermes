@@ -1,6 +1,6 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
 import { spawn } from 'child_process';
-import { dialog } from 'electron';
+import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import {
@@ -46,6 +46,34 @@ export const setTimeLimit = async (
   store.set('timeLimit', limit);
 };
 
+// Attempt to open the requested info about a case
+type InfoType = 'input' | 'output' | 'userOutput';
+export const openCaseInfo = async (
+  _event: Electron.IpcMainEvent,
+  caseID: string,
+  infoType: InfoType
+) => {
+  const dataLocation: string = store.get(`casePaths.${caseID}`) as string;
+  // Get a path to what we are trying to open
+  let absPath = '';
+  switch (infoType) {
+    case 'input':
+      absPath = path.join(dataLocation, `${caseID}.in`);
+      break;
+    case 'output':
+      absPath = path.join(dataLocation, `${caseID}.out`);
+      break;
+    case 'userOutput':
+      absPath = path.join(getCachePath(), `${caseID}.userOut`);
+      break;
+    default:
+      console.error(`Invalid infoType requested: ${infoType}`);
+      break;
+  }
+
+  shell.openPath(absPath);
+};
+
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
 type ResponseType = {
   verdict: VerdictType;
@@ -87,7 +115,9 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   const inputIds = inputs.map((absPath) => {
-    return getFileNameFromPath(absPath);
+    const caseID = getFileNameFromPath(absPath);
+    store.set(`casePaths.${caseID}`, path.dirname(absPath));
+    return caseID;
   });
 
   event.reply(CHANNELS.DONE_COLLECT_DATA, inputIds);

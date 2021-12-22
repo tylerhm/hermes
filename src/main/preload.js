@@ -16,6 +16,9 @@ contextBridge.exposeInMainWorld('electron', {
     judge() {
       ipcRenderer.send(CHANNELS.JUDGE);
     },
+    openCaseInfo(caseID, infoType) {
+      ipcRenderer.send(CHANNELS.OPEN_CASE_INFO, caseID, infoType);
+    },
     on(channel, func) {
       // Deliberately strip event as it includes `sender`
       if (validChannels.includes(channel))
