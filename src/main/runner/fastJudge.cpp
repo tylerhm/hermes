@@ -6,8 +6,8 @@
 
 using namespace std;
 
-const string CPU_SOFT = "CPUtimelimitexceeded";
-const string CPU_HARD = "Exited";
+const string CPU_SOFT = "cpu";
+const string CPU_HARD = "exited";
 enum STATUS_CODES {
     // Apollo defined
     AC = 0,
@@ -81,18 +81,21 @@ int main(int argc, char **argv) {
         FILE *runOutput = popen(run.c_str(), "r");
         int runStatus = 0;
 
-        char buf[128];
-        while (fgets(buf, 128, runOutput) != NULL) {
+        char buf[100];
+        if (fgets(buf, 100, runOutput) != NULL) {
             // Sanitize stderr, get rid of newlines and spaces
             string runStderr = "";
             for (int i = 0; buf[i] != '\0'; i++)
                 if (buf[i] != ' ' && buf[i] != '\n' && buf[i] != '\b')
-                    runStderr += buf[i];
+                    runStderr += tolower(buf[i]);
 
-            if (runStderr == CPU_SOFT || runStderr == CPU_HARD)
+            if (runStderr.find(CPU_SOFT) != string::npos || runStderr.find(CPU_HARD) != string::npos)
                 runStatus = TLE;
             else runStatus = RTE;
         }
+
+        // Close stream
+        pclose(runOutput);
 
         string verdict = "";
         // RTE or TLE
@@ -115,7 +118,8 @@ int main(int argc, char **argv) {
                 inputPath + " " +
                 outputPath + " " +
                 userOutputPath;
-            int checkReturnCode = WEXITSTATUS(system(check.c_str()));
+            int checkRet = system(check.c_str());
+            int checkReturnCode = WEXITSTATUS(checkRet);
 
             switch (checkReturnCode) {
                 case AC:
