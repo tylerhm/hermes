@@ -1,4 +1,7 @@
 const CHANNELS = {
+  CHECK_DEPS: 'renderer-check-deps',
+  DEPS_CHECKED: 'electron-deps-checked',
+
   SELECT_FILE: 'renderer-select-file',
   FILE_SELECTED: 'electron-file-selected',
 

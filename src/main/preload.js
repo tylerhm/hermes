@@ -4,6 +4,9 @@ const CHANNELS = require('./channels');
 const validChannels = Object.values(CHANNELS);
 contextBridge.exposeInMainWorld('electron', {
   ipcRenderer: {
+    checkDeps() {
+      ipcRenderer.send(CHANNELS.CHECK_DEPS);
+    },
     setFile(key, isDirectory) {
       ipcRenderer.send(CHANNELS.SELECT_FILE, key, isDirectory);
     },
