@@ -7,6 +7,9 @@ contextBridge.exposeInMainWorld('electron', {
     checkDeps() {
       ipcRenderer.send(CHANNELS.CHECK_DEPS);
     },
+    installDep(dep, installType, packageName) {
+      ipcRenderer.send(CHANNELS.INSTALL_DEP, dep, installType, packageName);
+    },
     setFile(key, isDirectory) {
       ipcRenderer.send(CHANNELS.SELECT_FILE, key, isDirectory);
     },

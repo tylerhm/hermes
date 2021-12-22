@@ -1,3 +1,4 @@
+/* eslint global-require: off, no-console: off, promise/always-return: off */
 import { exec } from 'child_process';
 import CHANNELS from './channels';
 
@@ -31,17 +32,39 @@ const xdgOpenExists = () => {
 const isWSL = () => {
   return new Promise<boolean>((resolve) => {
     exec('uname -r', (_err, stdout) => {
-      resolve(stdout.toLowerCase().includes('microsoft'));
+      resolve(stdout.toLowerCase().includes('wsl'));
     });
   });
 };
 
-const checkDeps = async (event: Electron.IpcMainEvent) => {
+export const checkDeps = async (event: Electron.IpcMainEvent) => {
   event.reply(CHANNELS.DEPS_CHECKED, {
-    python3: await python3Exists(),
-    apollo: await apolloExists(),
-    xdgOpen: (await isWSL()) ? await xdgOpenExists() : true,
+    'Python 3': await python3Exists(),
+    Apollo: await apolloExists(),
+    'xdg-open-wsl': (await isWSL()) ? await xdgOpenExists() : true,
   });
 };
 
-export default checkDeps;
+// Allowed room for more install types here for later
+type InstallType = 'pip';
+export const installDep = (
+  event: Electron.IpcMainEvent,
+  dep: string,
+  installType: InstallType,
+  packageName: string
+) => {
+  let command: string;
+  switch (installType) {
+    case 'pip':
+      command = `python3 -m pip install ${packageName} --upgrade`;
+      break;
+    default:
+      console.error(`Unsupported installType: ${installType}`);
+      return;
+  }
+
+  // True response if valid install
+  exec(command, (err) => {
+    event.reply(CHANNELS.DEP_INSTALLED, dep, err == null);
+  });
+};
