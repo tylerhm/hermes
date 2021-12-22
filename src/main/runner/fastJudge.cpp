@@ -18,6 +18,9 @@ enum STATUS_CODES {
     RTE = 4,
 };
 
+const int BUF_SIZE = 256;
+char buf[BUF_SIZE];
+
 // Parses comma separated list
 vector<string> parseInputArray(string inp) {
     vector<string> res;
@@ -45,7 +48,9 @@ string stringVecToJSON(vector<string> &vec) {
     string ret = "";
     ret += '[';
     for (int i = 0; i < len; i++) {
-        ret += "\"" + vec[i] + "\"";
+        string str = vec[i];
+        replace(str.begin(), str.end(), '\"', '\'');
+        ret += "\"" + str + "\"";
         if (i < len - 1)
             ret += ',';
     }
@@ -95,9 +100,8 @@ int main(int argc, char **argv) {
         FILE *runOutput = popen(run.c_str(), "r");
         int runStatus = 0;
 
-        char buf[100];
         string runStderr = "";
-        if (fgets(buf, 100, runOutput) != NULL) {
+        if (fgets(buf, BUF_SIZE, runOutput) != NULL) {
             // Sanitize stderr, get rid of newlines and spaces
             string stdErrSanitized = "";
             for (int i = 0; buf[i] != '\0'; i++) {
@@ -139,7 +143,7 @@ int main(int argc, char **argv) {
         }
         // All good! Let's check it now
         else {
-            string check = "python3 -m apollo -v " +
+            string check = "python3 -m apollo -v -t " +
                 inputPath + " " +
                 outputPath + " " +
                 userOutputPath;
@@ -147,8 +151,7 @@ int main(int argc, char **argv) {
             FILE *checkOutput = popen(check.c_str(), "r");
 
             // Parse stdout from Apollo
-            char buf[100];
-            while (fgets(buf, 100, runOutput) != NULL) {
+            while (fgets(buf, 256, checkOutput) != NULL) {
                 string curMessage = "";
                 for (int i = 0; buf[i] != '\0'; i++) {
                     if (buf[i] == '\n') {
@@ -173,6 +176,7 @@ int main(int argc, char **argv) {
                     break;
                 default:
                     verdict = "INTERNAL_ERROR";
+                    messages.push_back("Oops... This is unexpected o.0");
                     break;
             }
         }

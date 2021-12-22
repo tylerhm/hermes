@@ -9,7 +9,8 @@ import {
 
 // Compile source, and return path to binary
 const compile = async (sourcePath: string, lang: LangType) => {
-  const sourceName = trimExtension(getFileNameFromPath(sourcePath));
+  const sourceFile = getFileNameFromPath(sourcePath);
+  const sourceName = trimExtension(sourceFile);
 
   const command = langSpecific(lang, {
     cpp: `g++ ${sourcePath} -O2 -o ${getCachePath(sourceName)}`,
@@ -21,7 +22,7 @@ const compile = async (sourcePath: string, lang: LangType) => {
   return new Promise<string>((resolve, reject) => {
     exec(command, (err) => {
       if (err) reject(err);
-      resolve(getCachePath(sourceName));
+      resolve(getCachePath(lang === 'py' ? sourceFile : sourceName));
     });
   });
 };
