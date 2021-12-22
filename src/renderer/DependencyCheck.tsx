@@ -51,7 +51,9 @@ const DependencyCheck = () => {
     return () => {
       eventHandler.removeListener(CHANNELS.DEPS_CHECKED, updateDeps);
     };
-  }, [history]);
+    // Fine here, as history will only change once on success.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <div
