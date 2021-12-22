@@ -9,7 +9,8 @@ import {
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Button, { ButtonType } from 'antd-button-color';
-import { VerdictType } from './Types';
+import eventHandler from './eventHandler';
+import { InfoType, VerdictType } from './Types';
 import useResults from './useResults';
 
 type ResultsMetaType = {
@@ -49,21 +50,34 @@ const RESULT_META: ResultsMetaType = {
   },
 };
 
-type MessageProps = {
+type PopoverProps = {
   caseID: string;
   messages: Array<string>;
 };
-const MessageSplitter = ({ caseID, messages }: MessageProps) => {
+const PopoverContent = ({ caseID, messages }: PopoverProps) => {
+  const requestInfo = (infoType: InfoType) => {
+    eventHandler.openCaseInfo(caseID, infoType);
+  };
   return (
     <div
       style={{
         display: 'flex',
         flexDirection: 'column',
+        rowGap: '0.2em',
       }}
     >
       {messages.map((message) => (
         <div key={`${caseID}-${message}`}>{message}</div>
       ))}
+      <Button type="dashed" onClick={() => requestInfo('input')}>
+        Input
+      </Button>
+      <Button type="dashed" onClick={() => requestInfo('output')}>
+        Judge Output
+      </Button>
+      <Button type="dashed" onClick={() => requestInfo('userOutput')}>
+        User Output
+      </Button>
     </div>
   );
 };
@@ -88,7 +102,7 @@ const Results = () => {
           <Popover
             title={caseID}
             content={
-              <MessageSplitter caseID={caseID} messages={result.messages} />
+              <PopoverContent caseID={caseID} messages={result.messages} />
             }
             key={caseID}
           >

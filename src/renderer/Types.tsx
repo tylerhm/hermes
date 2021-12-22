@@ -11,3 +11,4 @@ export type Response = {
   verdict: VerdictType;
   messages: Array<string>;
 };
+export type InfoType = 'input' | 'output' | 'userOutput';

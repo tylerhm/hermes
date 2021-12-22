@@ -17,7 +17,7 @@ import log from 'electron-log';
 import MenuBuilder from './menu';
 import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
-import { selectFile, judge, setTimeLimit } from './runner/judge';
+import { selectFile, judge, setTimeLimit, openCaseInfo } from './runner/judge';
 import { clearCache, touchCache } from './utils';
 import checkDeps from './depCheck';
 
@@ -36,6 +36,7 @@ ipcMain.on(CHANNELS.CHECK_DEPS, checkDeps);
 ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
 ipcMain.on(CHANNELS.JUDGE, judge);
+ipcMain.on(CHANNELS.OPEN_CASE_INFO, openCaseInfo);
 
 // Clear our cache, and then make sure it exists
 clearCache();

@@ -21,6 +21,8 @@ const CHANNELS = {
   BEGIN_JUDGING: 'electron-begin-judging',
   CASE_JUDGED: 'electron-case-judged',
   DONE_JUDGING: 'electron-done-judging',
+
+  OPEN_CASE_INFO: 'renderer-request-open-case-info',
 };
 
 module.exports = CHANNELS;
