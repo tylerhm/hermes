@@ -28,11 +28,19 @@ const xdgOpenExists = () => {
   });
 };
 
+const isWSL = () => {
+  return new Promise<boolean>((resolve) => {
+    exec('uname -r', (_err, stdout) => {
+      resolve(stdout.toLowerCase().includes('microsoft'));
+    });
+  });
+};
+
 const checkDeps = async (event: Electron.IpcMainEvent) => {
   event.reply(CHANNELS.DEPS_CHECKED, {
     python3: await python3Exists(),
     apollo: await apolloExists(),
-    xdgOpen: await xdgOpenExists(),
+    xdgOpen: (await isWSL()) ? await xdgOpenExists() : true,
   });
 };
 
