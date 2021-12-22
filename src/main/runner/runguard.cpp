@@ -1,13 +1,11 @@
-#include <string>
 #include <iostream>
+#include <string>
 #include <sys/time.h>
 #include <sys/resource.h>
 
 using namespace std;
 
-// cachePath binaryPath binName lang inputPath outputPath timelimit
-const int NUM_ARGS = 7;
-
+// Set resouce limit on this process
 void setLimit(int type, int soft, int hard) {
     rlimit lim;
     lim.rlim_cur = soft;
@@ -15,13 +13,14 @@ void setLimit(int type, int soft, int hard) {
     setrlimit(type, &lim);
 }
 
+const int NUM_ARGS = 7;
 int main(int argc, char **argv) {
     if (argc - 1 < NUM_ARGS) {
         cerr << "Usage: runguard cachePath binaryPath binaryName lang inputPath outputPath timelimit(seconds)\n";
         return 1;
     }
 
-    // parse args
+    // Parse args.
     string cachePath(argv[1]);
     string binaryPath(argv[2]);
     string binName(argv[3]);
@@ -29,9 +28,8 @@ int main(int argc, char **argv) {
     string inputPath(argv[5]);
     string outputPath(argv[6]);
     int timeLimit = stoi(string(argv[7]));
-    cout << timeLimit << endl;
 
-    // set the process limits
+    // Set the process limits.
     setLimit(RLIMIT_CPU, timeLimit, timeLimit + 1);
 
     string command = "";
