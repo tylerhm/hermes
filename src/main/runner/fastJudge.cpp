@@ -1,9 +1,24 @@
+#include <cstdlib>
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <vector>
 
 using namespace std;
 
+const string CPU_SOFT = "CPUtimelimitexceeded";
+const string CPU_HARD = "Exited";
+enum STATUS_CODES {
+    // Apollo defined
+    AC = 0,
+    WA = 1,
+    PE = 2,
+
+    TLE = 3,
+    RTE = 4,
+};
+
+// Parses comma separated list
 vector<string> parseInputArray(string inp) {
     vector<string> res;
 
@@ -23,17 +38,6 @@ vector<string> parseInputArray(string inp) {
 
     return res;
 }
-
-enum RETURN_CODES {
-    // Apollo defined
-    AC = 0,
-    WA = 3,
-    PE = 4,
-
-    // System defined
-    TLE = 152,
-    RTE = 139
-};
 
 const int NUM_ARGS = 10;
 int main(int argc, char **argv) {
@@ -62,6 +66,9 @@ int main(int argc, char **argv) {
         string userOutputPath = cachePath + directoryPathSeparator + inputID + ".userOut";
 
         // Run the case with provided runs script
+        // Pipe stderr to stdout so that we can monitor for TLE or RTE
+        // It would be nice to use return codes here, but unfortunately,
+        // resource limitting is not guaranteed to provide an exit code. (OS dep)
         string run = runScriptBinaryPath + " " +
             cachePath + " " +
             binaryPath + " " +
@@ -69,14 +76,28 @@ int main(int argc, char **argv) {
             lang + " " +
             inputPath + " " +
             userOutputPath + " " +
-            timeLimit;
-        int runReturnCode = system(run.c_str());
+            timeLimit + " 2>&1 >/dev/null";
+
+        FILE *runOutput = popen(run.c_str(), "r");
+        int runStatus = 0;
+
+        char buf[128];
+        while (fgets(buf, 128, runOutput) != NULL) {
+            // Sanitize stderr, get rid of newlines and spaces
+            string runStderr = "";
+            for (int i = 0; buf[i] != '\0'; i++)
+                if (buf[i] != ' ' && buf[i] != '\n' && buf[i] != '\b')
+                    runStderr += buf[i];
+
+            if (runStderr == CPU_SOFT || runStderr == CPU_HARD)
+                runStatus = TLE;
+            else runStatus = RTE;
+        }
 
         string verdict = "";
-
         // RTE or TLE
-        if (runReturnCode != 0) {
-            switch (runReturnCode) {
+        if (runStatus != 0) {
+            switch (runStatus) {
                 case TLE:
                     verdict = "TLE";
                     break;
@@ -94,7 +115,7 @@ int main(int argc, char **argv) {
                 inputPath + " " +
                 outputPath + " " +
                 userOutputPath;
-            int checkReturnCode = system(check.c_str());
+            int checkReturnCode = WEXITSTATUS(system(check.c_str()));
 
             switch (checkReturnCode) {
                 case AC:
@@ -112,6 +133,7 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Make our decision available to Hermes on stdout
         cout << "{";
         cout << "\"inputId\":\"" + inputID + "\",";
         cout << "\"verdict\":\"" + verdict + "\"";
