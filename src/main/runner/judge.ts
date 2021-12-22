@@ -143,14 +143,17 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   type MessageType = {
     inputId: string;
     verdict: VerdictType;
+    messages: Array<string>;
   };
 
   let numJudged = 0;
   judger.stdout.on('data', (msg) => {
+    console.log(msg.toString());
+    if (msg.toString()[0] !== '{') return;
     const message: MessageType = JSON.parse(msg.toString());
     results[message.inputId] = {
       verdict: message.verdict,
-      messages: [message.verdict],
+      messages: message.messages,
     };
 
     event.reply(CHANNELS.CASE_JUDGED, results);

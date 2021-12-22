@@ -39,6 +39,20 @@ vector<string> parseInputArray(string inp) {
     return res;
 }
 
+// Convert string vector to JSON format
+string stringVecToJSON(vector<string> &vec) {
+    int len = vec.size();
+    string ret = "";
+    ret += '[';
+    for (int i = 0; i < len; i++) {
+        ret += "\"" + vec[i] + "\"";
+        if (i < len - 1)
+            ret += ',';
+    }
+    ret += ']';
+    return ret;
+}
+
 const int NUM_ARGS = 10;
 int main(int argc, char **argv) {
     if (argc - 1 < NUM_ARGS) {
@@ -82,14 +96,19 @@ int main(int argc, char **argv) {
         int runStatus = 0;
 
         char buf[100];
+        string runStderr = "";
         if (fgets(buf, 100, runOutput) != NULL) {
             // Sanitize stderr, get rid of newlines and spaces
-            string runStderr = "";
-            for (int i = 0; buf[i] != '\0'; i++)
-                if (buf[i] != ' ' && buf[i] != '\n' && buf[i] != '\b')
-                    runStderr += tolower(buf[i]);
+            string stdErrSanitized = "";
+            for (int i = 0; buf[i] != '\0'; i++) {
+                if (buf[i] != '\n' && buf[i] != '\b') {
+                    if (buf[i] != ' ')
+                      stdErrSanitized += tolower(buf[i]);
+                    runStderr += buf[i];
+                }
+            }
 
-            if (runStderr.find(CPU_SOFT) != string::npos || runStderr.find(CPU_HARD) != string::npos)
+            if (stdErrSanitized.find(CPU_SOFT) != string::npos || stdErrSanitized.find(CPU_HARD) != string::npos)
                 runStatus = TLE;
             else runStatus = RTE;
         }
@@ -98,29 +117,50 @@ int main(int argc, char **argv) {
         pclose(runOutput);
 
         string verdict = "";
+        vector<string> messages;
         // RTE or TLE
         if (runStatus != 0) {
             switch (runStatus) {
                 case TLE:
                     verdict = "TLE";
+                    messages.push_back("TLE: Time Limit Exceeded");
+                    messages.push_back("Execution timed out.");
                     break;
                 case RTE:
                     verdict = "RTE";
+                    messages.push_back("RTE: Run Time Error");
+                    messages.push_back(runStderr);
                     break;
                 default:
                     verdict = "INTERNAL_ERROR";
+                    messages.push_back("Oops... This is unexpected o.0");
                     break;
             }
         }
         // All good! Let's check it now
         else {
-            string check = "python3 -m apollo " +
+            string check = "python3 -m apollo -v " +
                 inputPath + " " +
                 outputPath + " " +
                 userOutputPath;
-            int checkRet = system(check.c_str());
-            int checkReturnCode = WEXITSTATUS(checkRet);
 
+            FILE *checkOutput = popen(check.c_str(), "r");
+
+            // Parse stdout from Apollo
+            char buf[100];
+            while (fgets(buf, 100, runOutput) != NULL) {
+                string curMessage = "";
+                for (int i = 0; buf[i] != '\0'; i++) {
+                    if (buf[i] == '\n') {
+                        if (curMessage != "")
+                          messages.push_back(curMessage);
+                        curMessage = "";
+                    } else curMessage += buf[i];
+                }
+            }
+
+            int checkStatus = pclose(checkOutput);
+            int checkReturnCode = WEXITSTATUS(checkStatus);
             switch (checkReturnCode) {
                 case AC:
                     verdict = "AC";
@@ -140,7 +180,8 @@ int main(int argc, char **argv) {
         // Make our decision available to Hermes on stdout
         cout << "{";
         cout << "\"inputId\":\"" + inputID + "\",";
-        cout << "\"verdict\":\"" + verdict + "\"";
+        cout << "\"verdict\":\"" + verdict + "\",";
+        cout << "\"messages\":" + stringVecToJSON(messages);
         cout << "}";
         cout.flush();
     }
