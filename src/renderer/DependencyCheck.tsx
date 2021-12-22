@@ -36,8 +36,6 @@ const DependencyCheck = () => {
   };
 
   useEffect(() => {
-    checkDeps();
-
     const updateDeps = (newDepsStatus: DepsStatusType) => {
       if (Object.values(newDepsStatus).every((value) => value))
         history.push('/home');
@@ -47,6 +45,8 @@ const DependencyCheck = () => {
     };
 
     eventHandler.on(CHANNELS.DEPS_CHECKED, updateDeps);
+
+    checkDeps();
 
     return () => {
       eventHandler.removeListener(CHANNELS.DEPS_CHECKED, updateDeps);
