@@ -7,11 +7,12 @@ Hermes makes frequent use of the shell for compilation and checking. In order fo
 - [python3](https://realpython.com/installing-python/)
 - [Apollo](https://github.com/TylerMathis/apollo)
 - Compiler / Interpreter for your languages
-- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl)
+- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl) *Only for WSL users*
+- [wsl](https://docs.microsoft.com/en-us/windows/wsl/install) *Only for Windows users*
 
 Of the above, the following are installable through Hermes UI:
 - [Apollo](https://github.com/TylerMathis/apollo)
-- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl)
+- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl) *Only for WSL users*
 
 ## Starting Development
 
