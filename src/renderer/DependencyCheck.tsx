@@ -61,24 +61,13 @@ const DependencyCheck = () => {
   );
   const [checking, setChecking] = useState<boolean>(true);
 
-  const updateDepsInstalling = (dep: DepType, installing: boolean) => {
-    setDepsInstalling({ ...depsInstalling, [dep]: installing });
-  };
-
   const checkDeps = () => {
     setChecking(true);
-    eventHandler.checkDeps();
+    // UI smoothness
+    setTimeout(eventHandler.checkDeps, 500);
   };
 
-  const depInstalled = (dep: DepType, successful: boolean) => {
-    updateDepsInstalling(dep, false);
-    if (successful) checkDeps();
-    else
-      message.error(
-        `Unable to install dependency '${dep}'. Please ensure that python3 is installed.`
-      );
-  };
-
+  // Should run once, subscribe to dependency changes
   useEffect(() => {
     const updateDeps = (newDepsStatus: DepsStatusType) => {
       if (Object.values(newDepsStatus).every((value) => value))
@@ -89,17 +78,32 @@ const DependencyCheck = () => {
     };
 
     eventHandler.on(CHANNELS.DEPS_CHECKED, updateDeps);
-    eventHandler.on(CHANNELS.DEP_INSTALLED, depInstalled);
 
     checkDeps();
 
     return () => {
       eventHandler.removeListener(CHANNELS.DEPS_CHECKED, updateDeps);
-      eventHandler.removeListener(CHANNELS.DEP_INSTALLED, depInstalled);
     };
-    // Fine here, as history will only change once on success.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Handle installing updates
+  useEffect(() => {
+    const depInstalled = (dep: DepType, successful: boolean) => {
+      setDepsInstalling({ ...depsInstalling, [dep]: false });
+      if (successful) checkDeps();
+      else
+        message.error(
+          `Unable to install dependency '${dep}'. Please ensure that python3 is installed.`
+        );
+    };
+
+    eventHandler.on(CHANNELS.DEP_INSTALLED, depInstalled);
+
+    return () => {
+      eventHandler.removeListener(CHANNELS.DEP_INSTALLED, depInstalled);
+    };
+  }, [depsInstalling]);
 
   // Return list of missing dependencies
   const getMissingDeps = () => {
@@ -114,7 +118,7 @@ const DependencyCheck = () => {
   const installDep = (dep: DepType) => {
     const { installType, packageName } = depsMeta[dep];
     if (installType == null || packageName == null) return;
-    updateDepsInstalling(dep, true);
+    setDepsInstalling({ ...depsInstalling, [dep]: true });
     eventHandler.installDep(dep, installType, packageName);
   };
 
