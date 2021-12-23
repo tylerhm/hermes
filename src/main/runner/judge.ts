@@ -169,14 +169,24 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   );
   const normalizedCachePath = await maybeWslifyPath(getCachePath());
   const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
-  const normalizedInputPathPromises = inputs.map(async (id) => {
-    return maybeWslifyPath(`${id}.in`);
-  });
-  const normalizedOutputPathPromises = inputs.map(async (id) => {
-    return maybeWslifyPath(`${id}.out`);
-  });
-  const normalizedInputPaths = await Promise.all(normalizedInputPathPromises);
-  const normalizedOutputPaths = await Promise.all(normalizedOutputPathPromises);
+
+  let normalizedInputPaths: Array<string>;
+  let normalizedOutputPaths: Array<string>;
+  // Only make the call if necessary, these strings are HUGE.
+  if (process.platform === 'win32') {
+    const normalizedInputPathPromises = inputs.map(async (idPath) => {
+      return maybeWslifyPath(`${idPath}.in`);
+    });
+    const normalizedOutputPathPromises = inputs.map(async (idPath) => {
+      return maybeWslifyPath(`${idPath}.out`);
+    });
+    normalizedInputPaths = await Promise.all(normalizedInputPathPromises);
+    normalizedOutputPaths = await Promise.all(normalizedOutputPathPromises);
+  } else {
+    normalizedInputPaths = inputs.map((idPath) => `${idPath}.in`);
+    normalizedOutputPaths = inputs.map((idPath) => `${idPath}.out`);
+  }
+
   const normalizedRunguardPath = await maybeWslifyPath(
     path.join(__dirname, 'runguard')
   );
