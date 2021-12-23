@@ -1,10 +1,11 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
 import { exec } from 'child_process';
+import { executeCommand } from './osSpecific';
 import CHANNELS from './channels';
 
 const python3Exists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('python3 --version', (err, _stdout, stderr) => {
+    executeCommand('python3 --version', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -13,7 +14,7 @@ const python3Exists = () => {
 
 const apolloExists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('python3 -m apollo --help', (err, _stdout, stderr) => {
+    executeCommand('python3 -m apollo --help', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -22,7 +23,7 @@ const apolloExists = () => {
 
 const xdgOpenExists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('xdg-open --help', (err, _stdout, stderr) => {
+    executeCommand('python3 -m xdg_open_wsl --help', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -31,18 +32,37 @@ const xdgOpenExists = () => {
 
 const isWSL = () => {
   return new Promise<boolean>((resolve) => {
-    exec('uname -r', (_err, stdout) => {
+    executeCommand('uname -r', (_err, stdout) => {
       resolve(stdout.toLowerCase().includes('wsl'));
     });
   });
 };
 
-export const checkDeps = async (event: Electron.IpcMainEvent) => {
-  event.reply(CHANNELS.DEPS_CHECKED, {
-    'Python 3': await python3Exists(),
-    Apollo: await apolloExists(),
-    'xdg-open-wsl': (await isWSL()) ? await xdgOpenExists() : true,
+const hasWSL = () => {
+  return new Promise<boolean>((resolve) => {
+    // List versions, and make sure that we have enough
+    exec('wsl -l', (err, stdout) => {
+      if (err != null) resolve(false);
+      else resolve(stdout.split('\n').filter((line) => line !== '').length > 1);
+    });
   });
+};
+
+export const checkDeps = async (event: Electron.IpcMainEvent) => {
+  if (process.platform === 'win32' && !(await hasWSL()))
+    event.reply(CHANNELS.DEPS_CHECKED, {
+      'Python 3': true,
+      Apollo: true,
+      'xdg-open-wsl': true,
+      wsl: false,
+    });
+  else
+    event.reply(CHANNELS.DEPS_CHECKED, {
+      'Python 3': await python3Exists(),
+      Apollo: await apolloExists(),
+      'xdg-open-wsl': (await isWSL()) ? await xdgOpenExists() : true,
+      wsl: true,
+    });
 };
 
 // Allowed room for more install types here for later
@@ -64,7 +84,7 @@ export const installDep = (
   }
 
   // True response if valid install
-  exec(command, (err) => {
+  executeCommand(command, (err) => {
     event.reply(CHANNELS.DEP_INSTALLED, dep, err == null);
   });
 };

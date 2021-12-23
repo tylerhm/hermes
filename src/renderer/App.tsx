@@ -8,9 +8,8 @@ declare global {
   interface Window {
     electron: {
       ipcRenderer: {
-        on: (listener: string, func: unknown) => void;
+        on: (listener: string, func: unknown) => () => void;
         once: (listener: string, func: unknown) => void;
-        removeListener: (listener: string, func: unknown) => void;
         checkDeps: () => void;
         installDep: (
           dep: DepType,

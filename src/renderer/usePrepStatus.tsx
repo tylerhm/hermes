@@ -19,6 +19,19 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
       onError();
     };
 
+    const cancelError = () => {
+      setError(false);
+    };
+    const notifyMissingInfo = () => {
+      notifyError('Select source and data');
+    };
+    const notifyInvalidData = () => {
+      notifyError('Invalid data format');
+    };
+    const notifyCompilationError = () => {
+      notifyError('Compilation error');
+    };
+
     const prog = 100 / steps.length;
     const events = steps.reduce((curEvents, step, index) => {
       return {
@@ -29,30 +42,21 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
       };
     }, {});
 
-    eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, () => {
-      setError(false);
-    });
+    const removers: Array<() => void> = [];
+    removers.push(eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, cancelError));
 
     Object.entries(events).forEach(([event, registerEvent]) => {
-      eventHandler.on(event, registerEvent);
+      removers.push(eventHandler.on(event, registerEvent));
     });
 
-    eventHandler.on(CHANNELS.MISSING_INFO, () => {
-      notifyError('Select source and data');
-    });
-
-    eventHandler.on(CHANNELS.INVALID_DATA, () => {
-      notifyError('Invalid data format');
-    });
-
-    eventHandler.on(CHANNELS.COMPILATION_ERROR, () => {
-      notifyError('Compilation error');
-    });
+    removers.push(eventHandler.on(CHANNELS.MISSING_INFO, notifyMissingInfo));
+    removers.push(eventHandler.on(CHANNELS.INVALID_DATA, notifyInvalidData));
+    removers.push(
+      eventHandler.on(CHANNELS.COMPILATION_ERROR, notifyCompilationError)
+    );
 
     return () => {
-      Object.entries(events).forEach(([event, registerEvent]) => {
-        eventHandler.removeListener(event, registerEvent);
-      });
+      removers.forEach((remover) => remover());
     };
   }, [onError, steps]);
 

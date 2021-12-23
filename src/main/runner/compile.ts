@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { executeCommand, maybeWslifyPath } from '../osSpecific';
 import {
   getCachePath,
   getFileNameFromPath,
@@ -12,15 +12,21 @@ const compile = async (sourcePath: string, lang: LangType) => {
   const sourceFile = getFileNameFromPath(sourcePath);
   const sourceName = trimExtension(sourceFile);
 
+  const normalizedSourcePath = await maybeWslifyPath(sourcePath);
+  const normalizedCacheBinaryPath = await maybeWslifyPath(
+    getCachePath(sourceName)
+  );
+  const normalizedCachePath = await maybeWslifyPath(getCachePath());
+
   const command = langSpecific(lang, {
-    cpp: `g++ ${sourcePath} -O2 -o ${getCachePath(sourceName)}`,
-    c: `gcc ${sourcePath} -O2 -o ${getCachePath(sourceName)}`,
-    java: `javac ${sourcePath} -d ${getCachePath()}`,
-    py: `cp ${sourcePath} ${getCachePath()}`,
+    cpp: `g++ ${normalizedSourcePath} -O2 -o ${normalizedCacheBinaryPath}`,
+    c: `gcc ${normalizedSourcePath} -O2 -o ${normalizedCacheBinaryPath}`,
+    java: `javac ${normalizedSourcePath} -d ${normalizedCachePath}`,
+    py: `cp ${normalizedSourcePath} ${normalizedCachePath}`,
   }) as string;
 
   return new Promise<string>((resolve, reject) => {
-    exec(command, (err) => {
+    executeCommand(command, (err) => {
       if (err) reject(err);
       resolve(getCachePath(lang === 'py' ? sourceFile : sourceName));
     });

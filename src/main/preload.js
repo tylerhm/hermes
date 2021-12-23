@@ -24,16 +24,18 @@ contextBridge.exposeInMainWorld('electron', {
     },
     on(channel, func) {
       // Deliberately strip event as it includes `sender`
-      if (validChannels.includes(channel))
-        ipcRenderer.on(channel, (event, ...args) => func(...args));
+      if (validChannels.includes(channel)) {
+        const subscription = (event, ...args) => func(...args);
+        ipcRenderer.on(channel, subscription);
+        return () => {
+          ipcRenderer.removeListener(channel, subscription);
+        };
+      }
+      return () => {};
     },
     once(channel, func) {
       if (validChannels.includes(channel))
         ipcRenderer.once(channel, (event, ...args) => func(...args));
-    },
-    removeListener(channel, func) {
-      if (validChannels.includes(channel))
-        ipcRenderer.removeListener(channel, (event, ...args) => func(...args));
     },
   },
 });

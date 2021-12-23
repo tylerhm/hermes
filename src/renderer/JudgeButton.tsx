@@ -7,8 +7,15 @@ import JudgePrepProgress from './JudgePrepProgress';
 const JudgeButton = () => {
   const [spin, setSpin] = useState<boolean>(false);
 
+  const unSpin = () => {
+    setSpin(false);
+  };
+
   useEffect(() => {
-    window.electron.ipcRenderer.on(CHANNELS.DONE_JUDGING, () => setSpin(false));
+    const remover = eventHandler.on(CHANNELS.DONE_JUDGING, unSpin);
+    return () => {
+      remover();
+    };
   });
 
   const startJudging = () => {

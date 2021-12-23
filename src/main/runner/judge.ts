@@ -1,8 +1,8 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
-import { spawn } from 'child_process';
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
+import { maybeWslifyPath, spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -147,19 +147,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
-  const judger = spawn(path.join(__dirname, 'fastJudge'), [
-    getCachePath(),
-    getFileNameFromPath(compiledPath),
-    compiledPath,
-    lang,
-    inputIds.toString(),
-    inputs.map((id) => id.concat('.in')).toString(),
-    inputs.map((id) => id.concat('.out')).toString(),
-    timeLimit.toString(),
-    path.sep,
-    path.join(__dirname, 'runguard'),
-  ]);
-
   const results: ResultsType = inputs.reduce((curRes, absPath) => {
     return {
       ...curRes,
@@ -175,6 +162,47 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     verdict: VerdictType;
     messages: Array<string>;
   };
+
+  // Normalize all paths Windows -> WSL bridge users
+  const normalizedFastJudgeBinary = await maybeWslifyPath(
+    path.join(__dirname, 'fastJudge')
+  );
+  const normalizedCachePath = await maybeWslifyPath(getCachePath());
+  const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
+
+  let normalizedInputPaths: Array<string>;
+  let normalizedOutputPaths: Array<string>;
+  // Only make the call if necessary, these strings are HUGE.
+  if (process.platform === 'win32') {
+    const normalizedInputPathPromises = inputs.map(async (idPath) => {
+      return maybeWslifyPath(`${idPath}.in`);
+    });
+    const normalizedOutputPathPromises = inputs.map(async (idPath) => {
+      return maybeWslifyPath(`${idPath}.out`);
+    });
+    normalizedInputPaths = await Promise.all(normalizedInputPathPromises);
+    normalizedOutputPaths = await Promise.all(normalizedOutputPathPromises);
+  } else {
+    normalizedInputPaths = inputs.map((idPath) => `${idPath}.in`);
+    normalizedOutputPaths = inputs.map((idPath) => `${idPath}.out`);
+  }
+
+  const normalizedRunguardPath = await maybeWslifyPath(
+    path.join(__dirname, 'runguard')
+  );
+
+  const judger = spawnCommand(normalizedFastJudgeBinary, [
+    normalizedCachePath,
+    getFileNameFromPath(compiledPath),
+    normalizedBinaryPath,
+    lang,
+    inputIds.toString(),
+    normalizedInputPaths.toString(),
+    normalizedOutputPaths.toString(),
+    timeLimit.toString(),
+    '/',
+    normalizedRunguardPath,
+  ]);
 
   let numJudged = 0;
   judger.stdout.on('data', (msg) => {
