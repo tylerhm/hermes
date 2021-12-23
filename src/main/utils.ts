@@ -4,9 +4,7 @@ import fs from 'fs';
 import find from 'find';
 import makeDir from 'make-dir';
 import path from 'path';
-import { exec, ExecException } from 'child_process';
 import envPaths from './envPaths';
-import { isWin } from './depHandler';
 
 const paths = envPaths('hermes', { suffix: 'ucf' });
 
@@ -69,14 +67,4 @@ export const clearCache = () => {
 
 export const getCachePath = (fileName?: string) => {
   return fileName ? path.join(paths.cache, fileName) : paths.cache;
-};
-
-export const executecommand = (
-  command: string,
-  callback:
-    | ((error: ExecException | null, stdout: string, stderr: string) => void)
-    | undefined
-) => {
-  if (isWin()) exec(command, { shell: 'wsl' }, callback);
-  else exec(command, callback);
 };

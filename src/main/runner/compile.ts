@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { executeCommand } from '../osSpecific';
 import {
   getCachePath,
   getFileNameFromPath,
@@ -20,7 +20,7 @@ const compile = async (sourcePath: string, lang: LangType) => {
   }) as string;
 
   return new Promise<string>((resolve, reject) => {
-    exec(command, (err) => {
+    executeCommand(command, (err) => {
       if (err) reject(err);
       resolve(getCachePath(lang === 'py' ? sourceFile : sourceName));
     });

@@ -1,8 +1,8 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
-import { spawn } from 'child_process';
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
+import { spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -147,7 +147,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
-  const judger = spawn(path.join(__dirname, 'fastJudge'), [
+  const judger = spawnCommand(path.join(__dirname, 'fastJudge'), [
     getCachePath(),
     getFileNameFromPath(compiledPath),
     compiledPath,

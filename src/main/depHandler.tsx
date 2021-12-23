@@ -1,10 +1,10 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
-import { exec } from 'child_process';
+import { executeCommand } from './osSpecific';
 import CHANNELS from './channels';
 
 const python3Exists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('python3 --version', (err, _stdout, stderr) => {
+    executeCommand('python3 --version', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -13,7 +13,7 @@ const python3Exists = () => {
 
 const apolloExists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('python3 -m apollo --help', (err, _stdout, stderr) => {
+    executeCommand('python3 -m apollo --help', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -22,20 +22,16 @@ const apolloExists = () => {
 
 const xdgOpenExists = () => {
   return new Promise<boolean>((resolve) => {
-    exec('xdg-open --help', (err, _stdout, stderr) => {
+    executeCommand('xdg-open --help', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
   });
 };
 
-export const isWin = () => {
-  return process.platform === 'win32';
-};
-
 const isWSL = () => {
   return new Promise<boolean>((resolve) => {
-    exec('uname -r', (_err, stdout) => {
+    executeCommand('uname -r', (_err, stdout) => {
       resolve(stdout.toLowerCase().includes('wsl'));
     });
   });
@@ -43,14 +39,14 @@ const isWSL = () => {
 
 const hasWSL = () => {
   return new Promise<boolean>((resolve) => {
-    exec('wsl --version', (err) => {
+    executeCommand('wsl --version', (err) => {
       resolve(err == null);
     });
   });
 };
 
 export const checkDeps = async (event: Electron.IpcMainEvent) => {
-  if (isWin() && !(await hasWSL()))
+  if (process.platform === 'win32' && !(await hasWSL()))
     event.reply(CHANNELS.DEPS_CHECKED, {
       'Python 3': true,
       Apollo: true,
@@ -85,7 +81,7 @@ export const installDep = (
   }
 
   // True response if valid install
-  exec(command, (err) => {
+  executeCommand(command, (err) => {
     event.reply(CHANNELS.DEP_INSTALLED, dep, err == null);
   });
 };
