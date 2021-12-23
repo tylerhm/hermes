@@ -2,7 +2,7 @@
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
-import { spawnCommand } from '../osSpecific';
+import { maybeWslifyPath, spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -147,19 +147,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
-  const judger = spawnCommand(path.join(__dirname, 'fastJudge'), [
-    getCachePath(),
-    getFileNameFromPath(compiledPath),
-    compiledPath,
-    lang,
-    inputIds.toString(),
-    inputs.map((id) => id.concat('.in')).toString(),
-    inputs.map((id) => id.concat('.out')).toString(),
-    timeLimit.toString(),
-    path.sep,
-    path.join(__dirname, 'runguard'),
-  ]);
-
   const results: ResultsType = inputs.reduce((curRes, absPath) => {
     return {
       ...curRes,
@@ -175,6 +162,37 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     verdict: VerdictType;
     messages: Array<string>;
   };
+
+  // Normalize all paths Windows -> WSL bridge users
+  const normalizedFastJudgeBinary = await maybeWslifyPath(
+    path.join(__dirname, 'fastJudge')
+  );
+  const normalizedCachePath = await maybeWslifyPath(getCachePath());
+  const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
+  const normalizedInputPathPromises = inputs.map(async (id) => {
+    return maybeWslifyPath(`${id}.in`);
+  });
+  const normalizedOutputPathPromises = inputs.map(async (id) => {
+    return maybeWslifyPath(`${id}.out`);
+  });
+  const normalizedInputPaths = await Promise.all(normalizedInputPathPromises);
+  const normalizedOutputPaths = await Promise.all(normalizedOutputPathPromises);
+  const normalizedRunguardPath = await maybeWslifyPath(
+    path.join(__dirname, 'runguard')
+  );
+
+  const judger = spawnCommand(normalizedFastJudgeBinary, [
+    normalizedCachePath,
+    getFileNameFromPath(compiledPath),
+    normalizedBinaryPath,
+    lang,
+    inputIds.toString(),
+    normalizedInputPaths.toString(),
+    normalizedOutputPaths.toString(),
+    timeLimit.toString(),
+    '/',
+    normalizedRunguardPath,
+  ]);
 
   let numJudged = 0;
   judger.stdout.on('data', (msg) => {

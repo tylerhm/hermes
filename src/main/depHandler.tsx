@@ -1,4 +1,5 @@
 /* eslint global-require: off, no-console: off, promise/always-return: off */
+import { exec } from 'child_process';
 import { executeCommand } from './osSpecific';
 import CHANNELS from './channels';
 
@@ -22,7 +23,7 @@ const apolloExists = () => {
 
 const xdgOpenExists = () => {
   return new Promise<boolean>((resolve) => {
-    executeCommand('xdg-open --help', (err, _stdout, stderr) => {
+    executeCommand('python3 -m xdg_open_wsl --help', (err, _stdout, stderr) => {
       if (err != null || stderr !== '') resolve(false);
       resolve(true);
     });
@@ -39,8 +40,10 @@ const isWSL = () => {
 
 const hasWSL = () => {
   return new Promise<boolean>((resolve) => {
-    executeCommand('wsl --version', (err) => {
-      resolve(err == null);
+    // List versions, and make sure that we have enough
+    exec('wsl -l', (err, stdout) => {
+      if (err != null) resolve(false);
+      else resolve(stdout.split('\n').filter((line) => line !== '').length > 1);
     });
   });
 };
