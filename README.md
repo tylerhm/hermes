@@ -4,8 +4,14 @@
 
 Hermes makes frequent use of the shell for compilation and checking. In order for this to work, you _must_ have the following installed and in your PATH.
 
+- [python3](https://realpython.com/installing-python/)
 - [Apollo](https://github.com/TylerMathis/apollo)
 - Compiler / Interpreter for your languages
+- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl)
+
+Of the above, the following are installable through Hermes UI:
+- [Apollo](https://github.com/TylerMathis/apollo)
+- [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl)
 
 ## Starting Development
 
