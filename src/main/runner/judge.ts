@@ -46,6 +46,23 @@ export const setTimeLimit = async (
   store.set('timeLimit', limit);
 };
 
+// Set the checker in the store
+type CheckerType = 'diff' | 'token' | 'epsilon';
+export const setChecker = async (
+  _event: Electron.IpcMainEvent,
+  checker: CheckerType
+) => {
+  store.set('checker', checker);
+};
+
+// Set the epsilon in the store
+export const setEpsilon = async (
+  _event: Electron.IpcMainEvent,
+  epsilon: number
+) => {
+  store.set('epsilon', epsilon);
+};
+
 // Attempt to open the requested info about a case
 type InfoType = 'input' | 'output' | 'userOutput';
 export const openCaseInfo = async (
@@ -91,6 +108,8 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   const source = store.get('source', null) as string | null;
   const data = store.get('data', null) as string | null;
   const timeLimit = store.get('timeLimit', 1) as number;
+  const checker = store.get('checker', 'diff') as string;
+  const epsilon = store.get('epsilon', 0.0000001) as number;
 
   if (source == null || data == null) {
     event.reply(CHANNELS.MISSING_INFO);
@@ -202,6 +221,8 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     timeLimit.toString(),
     '/',
     normalizedRunguardPath,
+    checker,
+    epsilon.toString(),
   ]);
 
   let numJudged = 0;

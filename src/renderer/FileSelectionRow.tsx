@@ -12,7 +12,7 @@ const FileSelectionRow = ({ label, placeholder, value, onClick }: Props) => {
     <Row style={{ width: '100%' }}>
       <Col span={10}>{label}</Col>
       <Col span={14}>
-        <Button value="small" style={{ width: '100%' }} onClick={onClick}>
+        <Button style={{ width: '100%' }} onClick={onClick}>
           {value ?? placeholder}
         </Button>
       </Col>

@@ -2,7 +2,7 @@ import { exec, spawn, ExecException } from 'child_process';
 
 export const executeCommand = (
   command: string,
-  callback:
+  callback?:
     | ((error: ExecException | null, stdout: string, stderr: string) => void)
     | undefined
 ) => {

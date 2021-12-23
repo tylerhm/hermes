@@ -59,10 +59,10 @@ string stringVecToJSON(vector<string> &vec) {
     return ret;
 }
 
-const int NUM_ARGS = 10;
+const int NUM_ARGS = 12;
 int main(int argc, char **argv) {
     if (argc - 1 < NUM_ARGS) {
-        cout << "Usage: judge cachePath binaryName binaryPath lang [inputIDs,...] [inputPaths,...] [outputPaths,...] timeLimit directoryPathSeparator runScriptBinaryPath\n";
+        cout << "Usage: judge cachePath binaryName binaryPath lang [inputIDs,...] [inputPaths,...] [outputPaths,...] timeLimit directoryPathSeparator runScriptBinaryPath checker epsilon\n";
         return 1;
     }
 
@@ -77,6 +77,8 @@ int main(int argc, char **argv) {
     string timeLimit(argv[8]);
     string directoryPathSeparator(argv[9]);
     string runScriptBinaryPath(argv[10]);
+    string checker(argv[11]);
+    string epsilon(argv[12]);
 
     // Judge each case.
     for (int testCase = 0; testCase < inputIDs.size(); testCase++) {
@@ -144,7 +146,14 @@ int main(int argc, char **argv) {
         }
         // All good! Let's check it now
         else {
-            string check = "python3 -m apollo -v -t " +
+            string apolloLaunch = "python3 -m apollo -v";
+
+            if (checker == "token")
+                apolloLaunch += " -t";
+            else if (checker == "epsilon")
+                apolloLaunch += " -e " + epsilon;
+
+            string check = apolloLaunch + " " +
                 inputPath + " " +
                 outputPath + " " +
                 userOutputPath;
