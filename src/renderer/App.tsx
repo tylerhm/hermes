@@ -2,7 +2,7 @@ import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
 import DependencyCheck from './DependencyCheck';
 import Home from './Home';
 import './App.css';
-import { DepType, InfoType, InstallType } from './Types';
+import { CheckerType, DepType, InfoType, InstallType } from './Types';
 
 declare global {
   interface Window {
@@ -18,6 +18,8 @@ declare global {
         ) => void;
         setFile: (key: string, isDirectory: boolean) => void;
         setTimeLimit: (limit: number) => void;
+        setChecker: (checker: CheckerType) => void;
+        setEpsilon: (epsilon: number) => void;
         judge: () => void;
         openCaseInfo: (caseID: string, infoType: InfoType) => void;
       };
