@@ -33,13 +33,13 @@ const useResults = () => {
       setResults(newResults);
     };
 
-    eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, resetResults);
-    eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataRecieved);
-    eventHandler.on(CHANNELS.CASE_JUDGED, caseJudged);
+    const removers: Array<() => void> = [];
+    removers.push(eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, resetResults));
+    removers.push(eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataRecieved));
+    removers.push(eventHandler.on(CHANNELS.CASE_JUDGED, caseJudged));
 
     return () => {
-      eventHandler.removeListener(CHANNELS.DONE_COLLECT_DATA, dataRecieved);
-      eventHandler.removeListener(CHANNELS.CASE_JUDGED, caseJudged);
+      removers.forEach((remover) => remover());
     };
   }, []);
 

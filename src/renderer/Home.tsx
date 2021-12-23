@@ -29,10 +29,10 @@ export default function Home() {
   };
 
   useEffect(() => {
-    eventHandler.on(CHANNELS.FILE_SELECTED, updateFileName);
+    const remover = eventHandler.on(CHANNELS.FILE_SELECTED, updateFileName);
 
     return () => {
-      eventHandler.removeListener(CHANNELS.FILE_SELECTED, updateFileName);
+      remover();
     };
   }, [updateFileName]);
 

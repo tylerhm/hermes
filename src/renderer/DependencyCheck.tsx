@@ -82,12 +82,12 @@ const DependencyCheck = () => {
       setDepsStatus(newDepsStatus);
     };
 
-    eventHandler.on(CHANNELS.DEPS_CHECKED, updateDeps);
+    const remover = eventHandler.on(CHANNELS.DEPS_CHECKED, updateDeps);
 
     checkDeps();
 
     return () => {
-      eventHandler.removeListener(CHANNELS.DEPS_CHECKED, updateDeps);
+      remover();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -99,14 +99,14 @@ const DependencyCheck = () => {
       if (successful) checkDeps();
       else
         message.error(
-          `Unable to install dependency '${dep}'. Please ensure that python3 is installed.`
+          `Unable to install dependency '${dep}'. Please ensure that python3 and pip are installed.`
         );
     };
 
-    eventHandler.on(CHANNELS.DEP_INSTALLED, depInstalled);
+    const remover = eventHandler.on(CHANNELS.DEP_INSTALLED, depInstalled);
 
     return () => {
-      eventHandler.removeListener(CHANNELS.DEP_INSTALLED, depInstalled);
+      remover();
     };
   }, [depsInstalling]);
 
