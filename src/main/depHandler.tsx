@@ -29,6 +29,10 @@ const xdgOpenExists = () => {
   });
 };
 
+export const isWin = () => {
+  return process.platform === 'win32';
+};
+
 const isWSL = () => {
   return new Promise<boolean>((resolve) => {
     exec('uname -r', (_err, stdout) => {
@@ -37,12 +41,29 @@ const isWSL = () => {
   });
 };
 
-export const checkDeps = async (event: Electron.IpcMainEvent) => {
-  event.reply(CHANNELS.DEPS_CHECKED, {
-    'Python 3': await python3Exists(),
-    Apollo: await apolloExists(),
-    'xdg-open-wsl': (await isWSL()) ? await xdgOpenExists() : true,
+const hasWSL = () => {
+  return new Promise<boolean>((resolve) => {
+    exec('wsl --version', (err) => {
+      resolve(err == null);
+    });
   });
+};
+
+export const checkDeps = async (event: Electron.IpcMainEvent) => {
+  if (isWin() && !(await hasWSL()))
+    event.reply(CHANNELS.DEPS_CHECKED, {
+      'Python 3': true,
+      Apollo: true,
+      'xdg-open-wsl': true,
+      wsl: false,
+    });
+  else
+    event.reply(CHANNELS.DEPS_CHECKED, {
+      'Python 3': await python3Exists(),
+      Apollo: await apolloExists(),
+      'xdg-open-wsl': (await isWSL()) ? await xdgOpenExists() : true,
+      wsl: true,
+    });
 };
 
 // Allowed room for more install types here for later

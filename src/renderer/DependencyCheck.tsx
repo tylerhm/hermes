@@ -28,6 +28,9 @@ const depsMeta: DepsMetaType = {
     installType: 'pip',
     packageName: 'git+https://github.com/cpbotha/xdg-open-wsl.git',
   },
+  wsl: {
+    installable: false,
+  },
 };
 
 type DepsStatusType = {
@@ -37,6 +40,7 @@ const startingDeps: DepsStatusType = {
   'Python 3': false,
   Apollo: false,
   'xdg-open-wsl': false,
+  wsl: false,
 };
 
 type DepsInstallingType = {
@@ -46,6 +50,7 @@ const startingDepInstalling: DepsInstallingType = {
   'Python 3': false,
   Apollo: false,
   'xdg-open-wsl': false,
+  wsl: false,
 };
 
 /*
@@ -153,7 +158,7 @@ const DependencyCheck = () => {
                 }}
               >
                 <Typography.Text>{item}</Typography.Text>
-                {depsStatus[item] ? null : (
+                {depsMeta[item].installable ? (
                   <Button
                     disabled={!depsStatus['Python 3']}
                     loading={depsInstalling[item]}
@@ -161,7 +166,7 @@ const DependencyCheck = () => {
                   >
                     {depsInstalling[item] ? 'Installing' : 'Install'}
                   </Button>
-                )}
+                ) : null}
               </List.Item>
             )}
             style={{ marginBottom: '3em' }}
