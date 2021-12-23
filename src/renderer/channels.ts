@@ -1,6 +1,8 @@
 const CHANNELS = {
   DEPS_CHECKED: 'electron-deps-checked',
 
+  DEP_INSTALLED: 'electron-dep-installed',
+
   FILE_SELECTED: 'electron-file-selected',
 
   MISSING_INFO: 'electron-missing-info',

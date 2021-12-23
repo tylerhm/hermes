@@ -19,7 +19,7 @@ import { resolveHtmlPath } from './util';
 import CHANNELS from './channels';
 import { selectFile, judge, setTimeLimit, openCaseInfo } from './runner/judge';
 import { clearCache, touchCache } from './utils';
-import checkDeps from './depCheck';
+import { checkDeps, installDep } from './depHandler';
 
 export default class AppUpdater {
   constructor() {
@@ -37,6 +37,7 @@ ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
 ipcMain.on(CHANNELS.JUDGE, judge);
 ipcMain.on(CHANNELS.OPEN_CASE_INFO, openCaseInfo);
+ipcMain.on(CHANNELS.INSTALL_DEP, installDep);
 
 // Clear our cache, and then make sure it exists
 clearCache();

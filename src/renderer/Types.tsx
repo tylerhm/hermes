@@ -12,3 +12,5 @@ export type Response = {
   messages: Array<string>;
 };
 export type InfoType = 'input' | 'output' | 'userOutput';
+export type DepType = 'Python 3' | 'Apollo' | 'xdg-open-wsl';
+export type InstallType = 'pip';
