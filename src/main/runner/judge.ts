@@ -184,7 +184,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
 
   // Normalize all paths Windows -> WSL bridge users
   const normalizedFastJudgeBinary = await maybeWslifyPath(
-    path.join(__dirname, 'fastJudge')
+    path.join(__dirname, '../../binaries/fastJudge')
   );
   const normalizedCachePath = await maybeWslifyPath(getCachePath());
   const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
@@ -207,7 +207,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   }
 
   const normalizedRunguardPath = await maybeWslifyPath(
-    path.join(__dirname, 'runguard')
+    path.join(__dirname, '../../binaries/runguard')
   );
 
   const judger = spawnCommand(normalizedFastJudgeBinary, [

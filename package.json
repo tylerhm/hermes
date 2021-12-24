@@ -32,12 +32,13 @@
   "build": {
     "productName": "Hermes",
     "appId": "org.erb.Hermes",
-    "asar": true,
+    "asar": false,
     "asarUnpack": "**\\*.{node,dll}",
     "files": [
       "dist",
       "node_modules",
-      "package.json"
+      "package.json",
+      "binaries"
     ],
     "afterSign": ".erb/scripts/notarize.js",
     "mac": {
