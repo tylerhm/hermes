@@ -141,7 +141,7 @@ const DependencyCheck = () => {
     >
       {checking ? (
         <>
-          <h2 style={{ marginBottom: '3em' }}>Detecing dependencies...</h2>
+          <h2 style={{ marginBottom: '3em' }}>Detecting dependencies...</h2>
           <Spin />
         </>
       ) : (
