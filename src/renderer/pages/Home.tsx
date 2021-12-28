@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Space } from 'antd';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { FileKeyType, CheckerType } from '../utils/Types';
+import { FileKeyType, CheckerTypeType } from '../utils/Types';
 import FileSelectionRow from '../components/FileSelectionRow';
 import NumberSelectionRow from '../components/NumberSelectionRow';
 import JudgeButton from '../components/JudgeButton';
@@ -20,11 +20,17 @@ const FILE_KEYS = {
   OUTPUT: 'output',
 };
 
-const CHECKER_OPTIONS: Array<CheckerType> = ['diff', 'token', 'epsilon'];
+const CHECKER_TYPE_OPTIONS: Array<CheckerTypeType> = [
+  'diff',
+  'token',
+  'epsilon',
+];
 
 export default function Home() {
   const [fileInfo, setFileInfo] = useState<FileData>({});
-  const [checker, setChecker] = useState<CheckerType>(CHECKER_OPTIONS[0]);
+  const [checkerType, setCheckerType] = useState<CheckerTypeType>(
+    CHECKER_TYPE_OPTIONS[0]
+  );
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -48,9 +54,9 @@ export default function Home() {
     eventHandler.setTimeLimit(limit);
   };
 
-  const onChangeChecker = (newChecker: CheckerType) => {
-    setChecker(newChecker);
-    eventHandler.setChecker(newChecker);
+  const onChangeCheckerType = (newCheckerType: CheckerTypeType) => {
+    setCheckerType(newCheckerType);
+    eventHandler.setCheckerType(newCheckerType);
   };
 
   const onChangeEpsilon = (newEpsilon: number) => {
@@ -88,10 +94,12 @@ export default function Home() {
         />
         <DropdownSelectorRow
           label="Checker"
-          choices={CHECKER_OPTIONS}
-          onSelect={(value: string) => onChangeChecker(value as CheckerType)}
+          choices={CHECKER_TYPE_OPTIONS}
+          onSelect={(value: string) =>
+            onChangeCheckerType(value as CheckerTypeType)
+          }
         />
-        {checker === 'epsilon' ? (
+        {checkerType === 'epsilon' ? (
           <NumberSelectionRow
             label="Epsilon"
             type="float"
