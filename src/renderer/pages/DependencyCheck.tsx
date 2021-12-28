@@ -1,9 +1,9 @@
 import { useHistory } from 'react-router';
 import { Button, List, message, Spin, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import CHANNELS from './channels';
-import eventHandler from './eventHandler';
-import { DepType, InstallType } from './Types';
+import CHANNELS from '../utils/channels';
+import eventHandler from '../utils/eventHandler';
+import { DepType, InstallType } from '../utils/Types';
 
 type DepInfoType = {
   installable: boolean;

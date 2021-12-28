@@ -1,6 +1,6 @@
 import { Progress } from 'antd';
-import CHANNELS from './channels';
-import usePrepStatus from './usePrepStatus';
+import CHANNELS from '../utils/channels';
+import usePrepStatus from '../hooks/usePrepStatus';
 
 const steps = [CHANNELS.DONE_COLLECT_DATA, CHANNELS.DONE_COMPILING];
 

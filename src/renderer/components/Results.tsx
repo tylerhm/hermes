@@ -9,9 +9,9 @@ import {
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Button, { ButtonType } from 'antd-button-color';
-import eventHandler from './eventHandler';
-import { InfoType, VerdictType } from './Types';
-import useResults from './useResults';
+import eventHandler from '../utils/eventHandler';
+import { InfoType, VerdictType } from '../utils/Types';
+import useResults from '../hooks/useResults';
 
 type ResultsMetaType = {
   [K in VerdictType]: {

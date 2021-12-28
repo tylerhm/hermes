@@ -2,7 +2,7 @@ import { MemoryRouter as Router, Switch, Route } from 'react-router-dom';
 import DependencyCheck from './DependencyCheck';
 import Home from './Home';
 import './App.css';
-import { CheckerType, DepType, InfoType, InstallType } from './Types';
+import { CheckerType, DepType, InfoType, InstallType } from '../utils/Types';
 
 declare global {
   interface Window {

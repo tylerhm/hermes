@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { Space } from 'antd';
-import CHANNELS from './channels';
-import { FileKeyType, CheckerType } from './Types';
-import FileSelectionRow from './FileSelectionRow';
-import NumberSelectionRow from './NumberSelectionRow';
-import eventHandler from './eventHandler';
-import JudgeButton from './JudgeButton';
-import Results from './Results';
-import DropdownSelectorRow from './DropdownSelectorRow';
+import CHANNELS from '../utils/channels';
+import eventHandler from '../utils/eventHandler';
+import { FileKeyType, CheckerType } from '../utils/Types';
+import FileSelectionRow from '../components/FileSelectionRow';
+import NumberSelectionRow from '../components/NumberSelectionRow';
+import JudgeButton from '../components/JudgeButton';
+import Results from '../components/Results';
+import DropdownSelectorRow from '../components/DropdownSelectorRow';
 
 type FileData = {
   [K in FileKeyType]?: string;

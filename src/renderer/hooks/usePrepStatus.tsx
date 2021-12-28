@@ -1,7 +1,7 @@
 import { message } from 'antd';
 import { useEffect, useState } from 'react';
-import CHANNELS from './channels';
-import eventHandler from './eventHandler';
+import CHANNELS from '../utils/channels';
+import eventHandler from '../utils/eventHandler';
 
 const usePrepStatus = (steps: Array<string>, onError: () => void) => {
   const [progress, setProgress] = useState<number>(0);

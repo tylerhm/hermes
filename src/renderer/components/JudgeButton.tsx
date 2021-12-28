@@ -1,7 +1,7 @@
 import { Button } from 'antd';
 import { useEffect, useState } from 'react';
-import CHANNELS from './channels';
-import eventHandler from './eventHandler';
+import CHANNELS from '../utils/channels';
+import eventHandler from '../utils/eventHandler';
 import JudgePrepProgress from './JudgePrepProgress';
 
 const JudgeButton = () => {
