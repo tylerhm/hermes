@@ -12,6 +12,6 @@ export type Response = {
   messages: Array<string>;
 };
 export type InfoType = 'input' | 'output' | 'userOutput';
-export type CheckerTypeType = 'diff' | 'token' | 'epsilon';
+export type CheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
 export type DepType = 'Python 3' | 'Apollo' | 'xdg-open-wsl' | 'wsl';
 export type InstallType = 'pip';

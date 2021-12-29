@@ -20,6 +20,7 @@ const STORE_KEYS = {
   TIME_LIMIT: 'time-limit',
   CHECKER_TYPE: 'checker-type',
   EPSILON: 'epsilon',
+  CUSTOM_CHECKER_PATH: 'custom-checker-path',
 };
 
 const getDataLocationStoreKey = (caseID: string) => {
@@ -36,6 +37,11 @@ export const selectFile = async (
   key: string,
   isDir: boolean
 ) => {
+  if (!Object.values(STORE_KEYS).includes(key)) {
+    console.error(`Unsupported file key: ${key}`);
+    return;
+  }
+
   dialog
     .showOpenDialog({
       properties: [isDir ? 'openDirectory' : 'openFile'],
@@ -59,7 +65,7 @@ export const setTimeLimit = async (
 };
 
 // Set the checker in the store
-type CheckerTypeType = 'diff' | 'token' | 'epsilon';
+type CheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
 export const setCheckerType = async (
   _event: Electron.IpcMainEvent,
   checkerType: CheckerTypeType
@@ -122,10 +128,21 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   const source = store.get(STORE_KEYS.SOURCE, null) as string | null;
   const data = store.get(STORE_KEYS.DATA, null) as string | null;
   const timeLimit = store.get(STORE_KEYS.TIME_LIMIT, 1) as number;
-  const checker = store.get(STORE_KEYS.CHECKER_TYPE, 'diff') as string;
+  const checkerType = store.get(
+    STORE_KEYS.CHECKER_TYPE,
+    'diff'
+  ) as CheckerTypeType;
   const epsilon = store.get(STORE_KEYS.EPSILON, 0.0000001) as number;
+  const customCheckerPath = store.get(
+    STORE_KEYS.CUSTOM_CHECKER_PATH,
+    'NA'
+  ) as string;
 
-  if (source == null || data == null) {
+  if (
+    source == null ||
+    data == null ||
+    (checkerType === 'custom' && customCheckerPath === 'NA')
+  ) {
     event.reply(CHANNELS.MISSING_INFO);
     return;
   }
@@ -223,6 +240,10 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   const normalizedRunguardPath = await maybeWslifyPath(
     path.join(__dirname, '../../binaries/runguard')
   );
+  const normalizedCustomCheckerPath =
+    customCheckerPath === 'NA'
+      ? customCheckerPath
+      : await maybeWslifyPath(customCheckerPath);
 
   const judger = spawnCommand(normalizedFastJudgeBinary, [
     normalizedCachePath,
@@ -235,8 +256,9 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     timeLimit.toString(),
     '/',
     normalizedRunguardPath,
-    checker,
+    checkerType,
     epsilon.toString(),
+    normalizedCustomCheckerPath,
   ]);
 
   let numJudged = 0;
