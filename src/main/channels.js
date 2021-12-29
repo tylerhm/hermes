@@ -10,7 +10,7 @@ const CHANNELS = {
 
   SET_TIME_LIMIT: 'renderer-set-time-limit',
 
-  SET_CHECKER: 'renderer-set-checker',
+  SET_CHECKER_TYPE: 'renderer-set-checker-type',
   SET_EPSILON: 'renderer-set-epsilon',
 
   JUDGE: 'renderer-judge',

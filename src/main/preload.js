@@ -16,8 +16,8 @@ contextBridge.exposeInMainWorld('electron', {
     setTimeLimit(limit) {
       ipcRenderer.send(CHANNELS.SET_TIME_LIMIT, limit);
     },
-    setChecker(checker) {
-      ipcRenderer.send(CHANNELS.SET_CHECKER, checker);
+    setCheckerType(checkerType) {
+      ipcRenderer.send(CHANNELS.SET_CHECKER_TYPE, checkerType);
     },
     setEpsilon(epsilon) {
       ipcRenderer.send(CHANNELS.SET_EPSILON, epsilon);

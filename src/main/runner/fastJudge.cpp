@@ -59,10 +59,10 @@ string stringVecToJSON(vector<string> &vec) {
     return ret;
 }
 
-const int NUM_ARGS = 12;
+const int NUM_ARGS = 13;
 int main(int argc, char **argv) {
     if (argc - 1 < NUM_ARGS) {
-        cout << "Usage: judge cachePath binaryName binaryPath lang [inputIDs,...] [inputPaths,...] [outputPaths,...] timeLimit directoryPathSeparator runScriptBinaryPath checker epsilon\n";
+        cout << "Usage: judge cachePath binaryName binaryPath lang [inputIDs,...] [inputPaths,...] [outputPaths,...] timeLimit directoryPathSeparator runScriptBinaryPath checker epsilon customCheckerPath\n";
         return 1;
     }
 
@@ -79,6 +79,7 @@ int main(int argc, char **argv) {
     string runScriptBinaryPath(argv[10]);
     string checker(argv[11]);
     string epsilon(argv[12]);
+    string customCheckerPath(argv[13]);
 
     // Judge each case.
     for (int testCase = 0; testCase < inputIDs.size(); testCase++) {
@@ -152,11 +153,13 @@ int main(int argc, char **argv) {
                 apolloLaunch += " -t";
             else if (checker == "epsilon")
                 apolloLaunch += " -e " + epsilon;
+            else if (checker == "custom")
+                apolloLaunch += " -c " + customCheckerPath;
 
             string check = apolloLaunch + " " +
                 inputPath + " " +
-                outputPath + " " +
-                userOutputPath;
+                userOutputPath + " " +
+                outputPath;
 
             FILE *checkOutput = popen(check.c_str(), "r");
 

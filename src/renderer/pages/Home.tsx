@@ -2,12 +2,12 @@ import { useEffect, useState } from 'react';
 import { Space } from 'antd';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { FileKeyType, CheckerType } from '../utils/Types';
+import { FileKeyType } from '../utils/Types';
 import FileSelectionRow from '../components/FileSelectionRow';
 import NumberSelectionRow from '../components/NumberSelectionRow';
 import JudgeButton from '../components/JudgeButton';
 import Results from '../components/Results';
-import DropdownSelectorRow from '../components/DropdownSelectorRow';
+import CheckerTypeSelectorRow from '../components/CheckerTypeSelectorRow';
 
 type FileData = {
   [K in FileKeyType]?: string;
@@ -20,11 +20,8 @@ const FILE_KEYS = {
   OUTPUT: 'output',
 };
 
-const CHECKER_OPTIONS: Array<CheckerType> = ['diff', 'token', 'epsilon'];
-
 export default function Home() {
   const [fileInfo, setFileInfo] = useState<FileData>({});
-  const [checker, setChecker] = useState<CheckerType>(CHECKER_OPTIONS[0]);
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -46,15 +43,6 @@ export default function Home() {
 
   const onChangeTimeLimit = (limit: number) => {
     eventHandler.setTimeLimit(limit);
-  };
-
-  const onChangeChecker = (newChecker: CheckerType) => {
-    setChecker(newChecker);
-    eventHandler.setChecker(newChecker);
-  };
-
-  const onChangeEpsilon = (newEpsilon: number) => {
-    eventHandler.setEpsilon(newEpsilon);
   };
 
   return (
@@ -86,20 +74,7 @@ export default function Home() {
           units="seconds"
           onChange={onChangeTimeLimit}
         />
-        <DropdownSelectorRow
-          label="Checker"
-          choices={CHECKER_OPTIONS}
-          onSelect={(value: string) => onChangeChecker(value as CheckerType)}
-        />
-        {checker === 'epsilon' ? (
-          <NumberSelectionRow
-            label="Epsilon"
-            type="float"
-            min={0}
-            defaultValue={0.000001}
-            onChange={onChangeEpsilon}
-          />
-        ) : null}
+        <CheckerTypeSelectorRow />
         <JudgeButton />
         <Results />
       </Space>

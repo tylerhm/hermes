@@ -22,7 +22,7 @@ import {
   judge,
   setTimeLimit,
   openCaseInfo,
-  setChecker,
+  setCheckerType,
   setEpsilon,
 } from './runner/judge';
 import { clearCache, touchCache } from './utils';
@@ -42,7 +42,7 @@ let mainWindow: BrowserWindow | null = null;
 ipcMain.on(CHANNELS.CHECK_DEPS, checkDeps);
 ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
-ipcMain.on(CHANNELS.SET_CHECKER, setChecker);
+ipcMain.on(CHANNELS.SET_CHECKER_TYPE, setCheckerType);
 ipcMain.on(CHANNELS.SET_EPSILON, setEpsilon);
 ipcMain.on(CHANNELS.JUDGE, judge);
 ipcMain.on(CHANNELS.OPEN_CASE_INFO, openCaseInfo);
