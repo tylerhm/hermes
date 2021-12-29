@@ -120,10 +120,7 @@ type ResultsType = {
   [inputId: string]: ResponseType;
 };
 export const judge = async (event: Electron.IpcMainEvent) => {
-  /*
-   * DATA COLLECTION
-   */
-  event.reply(CHANNELS.BEGIN_COLLECT_DATA);
+  event.reply(CHANNELS.BEGIN_EVALUATION);
 
   const source = store.get(STORE_KEYS.SOURCE, null) as string | null;
   const data = store.get(STORE_KEYS.DATA, null) as string | null;
@@ -146,6 +143,31 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     event.reply(CHANNELS.MISSING_INFO);
     return;
   }
+
+  /*
+   * COMPILATION
+   */
+  event.reply(CHANNELS.BEGIN_COMPILING);
+
+  const ext = getExtension(source);
+  const lang = getLang(ext);
+
+  // Compile the code
+  let compiledPath: string;
+  try {
+    compiledPath = await compile(source, lang);
+  } catch (err) {
+    console.error(err);
+    event.reply(CHANNELS.COMPILATION_ERROR);
+    return;
+  }
+
+  event.reply(CHANNELS.DONE_COMPILING);
+
+  /*
+   * DATA COLLECTION
+   */
+  event.reply(CHANNELS.BEGIN_COLLECT_DATA);
 
   // Get inputs and outputs from data dir
   const inputs = (await findByExtension(data, 'in')).map((absPath) => {
@@ -171,26 +193,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
   });
 
   event.reply(CHANNELS.DONE_COLLECT_DATA, inputIds);
-
-  /*
-   * COMPILATION
-   */
-  event.reply(CHANNELS.BEGIN_COMPILING);
-
-  const ext = getExtension(source);
-  const lang = getLang(ext);
-
-  // Compile the code
-  let compiledPath: string;
-  try {
-    compiledPath = await compile(source, lang);
-  } catch (err) {
-    console.error(err);
-    event.reply(CHANNELS.COMPILATION_ERROR);
-    return;
-  }
-
-  event.reply(CHANNELS.DONE_COMPILING);
 
   /*
    * JUDGING

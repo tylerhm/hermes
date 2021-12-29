@@ -2,7 +2,7 @@ import { Progress } from 'antd';
 import CHANNELS from '../utils/channels';
 import usePrepStatus from '../hooks/usePrepStatus';
 
-const steps = [CHANNELS.DONE_COLLECT_DATA, CHANNELS.DONE_COMPILING];
+const steps = [CHANNELS.DONE_COMPILING, CHANNELS.DONE_COLLECT_DATA];
 
 type Props = {
   onError: () => void;
