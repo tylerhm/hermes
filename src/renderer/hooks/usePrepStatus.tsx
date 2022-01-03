@@ -23,7 +23,7 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
       setError(false);
     };
     const notifyMissingInfo = () => {
-      notifyError('Select source and data');
+      notifyError('Fill all required fields');
     };
     const notifyInvalidData = () => {
       notifyError('Invalid data format');

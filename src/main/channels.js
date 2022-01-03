@@ -15,6 +15,7 @@ const CHANNELS = {
 
   JUDGE: 'renderer-judge',
 
+  BEGIN_EVALUATION: 'electron-begin-evaluation',
   MISSING_INFO: 'electron-missing-info',
   BEGIN_COLLECT_DATA: 'electron-begin-collect-data',
   INVALID_DATA: 'electron-invalid-data',

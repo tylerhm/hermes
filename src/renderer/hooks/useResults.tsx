@@ -34,7 +34,7 @@ const useResults = () => {
     };
 
     const removers: Array<() => void> = [];
-    removers.push(eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, resetResults));
+    removers.push(eventHandler.on(CHANNELS.BEGIN_EVALUATION, resetResults));
     removers.push(eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataRecieved));
     removers.push(eventHandler.on(CHANNELS.CASE_JUDGED, caseJudged));
 

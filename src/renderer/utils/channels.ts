@@ -5,6 +5,7 @@ const CHANNELS = {
 
   FILE_SELECTED: 'electron-file-selected',
 
+  BEGIN_EVALUATION: 'electron-begin-evaluation',
   MISSING_INFO: 'electron-missing-info',
   BEGIN_COLLECT_DATA: 'electron-begin-collect-data',
   INVALID_DATA: 'electron-invalid-data',
