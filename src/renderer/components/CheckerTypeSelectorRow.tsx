@@ -2,7 +2,7 @@ import { Space } from 'antd';
 import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { CheckerTypeType } from '../utils/Types';
+import { CheckerTypeType, StoreKeyType } from '../utils/types';
 import DropdownSelectorRow from './DropdownSelectorRow';
 import FileSelectionRow from './FileSelectionRow';
 import NumberSelectionRow from './NumberSelectionRow';
@@ -21,25 +21,41 @@ const CheckerTypeSelectorRow = () => {
   const [checkerBinaryPath, setCheckerBinaryPath] = useState<
     string | undefined
   >();
+  const [epsilon, setEpsilon] = useState<number>(0.0000001);
 
-  const updateCheckerBinaryPath = (key: string, newPath: string) => {
+  const updateCheckerBinaryPath = (key: StoreKeyType, newPath: string) => {
     if (key === 'custom-checker-path') setCheckerBinaryPath(newPath);
   };
 
-  useEffect(() => {
-    const remover = eventHandler.on(
-      CHANNELS.FILE_SELECTED,
-      updateCheckerBinaryPath
-    );
+  const foundInStore = (key: StoreKeyType, res: unknown) => {
+    if (key === 'custom-checker-path') setCheckerBinaryPath(res as string);
+    else if (key === 'checker-type') setCheckerType(res as CheckerTypeType);
+    else if (key === 'epsilon') setEpsilon(res as number);
+  };
 
+  useEffect(() => {
+    const removers: Array<() => void> = [];
+    removers.push(
+      eventHandler.on(CHANNELS.FILE_SELECTED, updateCheckerBinaryPath)
+    );
+    removers.push(eventHandler.on(CHANNELS.FOUND_IN_STORE, foundInStore));
+
+    eventHandler.requestFromStore('checker-type');
+    eventHandler.requestFromStore('custom-checker-path');
+    eventHandler.requestFromStore('epsilon');
     return () => {
-      remover();
+      removers.forEach((remover) => remover());
     };
   }, []);
 
   const onChangeCheckerType = (newCheckerType: CheckerTypeType) => {
     setCheckerType(newCheckerType);
     eventHandler.setCheckerType(newCheckerType);
+  };
+
+  const onChangeEpsilon = (newEpsilon: number) => {
+    setEpsilon(newEpsilon);
+    eventHandler.setEpsilon(newEpsilon);
   };
 
   const getCheckerMetaComponent = () => {
@@ -50,8 +66,8 @@ const CheckerTypeSelectorRow = () => {
           type="float"
           min={0}
           max={999999}
-          defaultValue={0.000001}
-          onChange={(newEps: number) => eventHandler.setEpsilon(newEps)}
+          value={epsilon}
+          onChange={onChangeEpsilon}
         />
       );
 
@@ -72,6 +88,7 @@ const CheckerTypeSelectorRow = () => {
     <Space direction="vertical" style={{ width: '100%' }}>
       <DropdownSelectorRow
         label="Checker"
+        value={checkerType}
         choices={CHECKER_TYPE_OPTIONS}
         onSelect={(value: string) =>
           onChangeCheckerType(value as CheckerTypeType)

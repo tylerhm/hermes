@@ -1,4 +1,6 @@
 const CHANNELS = {
+  FOUND_IN_STORE: 'electron-found-in-store',
+
   DEPS_CHECKED: 'electron-deps-checked',
 
   DEP_INSTALLED: 'electron-dep-installed',
@@ -7,6 +9,8 @@ const CHANNELS = {
 
   BEGIN_EVALUATION: 'electron-begin-evaluation',
   MISSING_INFO: 'electron-missing-info',
+  FILE_NOT_EXIST: 'electron-file-not-exist',
+  FOLDER_NOT_EXIST: 'electron-folder-not-exist',
   BEGIN_COLLECT_DATA: 'electron-begin-collect-data',
   INVALID_DATA: 'electron-invalid-data',
   DONE_COLLECT_DATA: 'electron-done-collect-data',

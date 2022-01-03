@@ -10,7 +10,7 @@ import {
 import { Popover } from 'antd';
 import Button, { ButtonType } from 'antd-button-color';
 import eventHandler from '../utils/eventHandler';
-import { InfoType, VerdictType } from '../utils/Types';
+import { InfoType, VerdictType } from '../utils/types';
 import useResults from '../hooks/useResults';
 
 type ResultsMetaType = {

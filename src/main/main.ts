@@ -24,6 +24,7 @@ import {
   openCaseInfo,
   setCheckerType,
   setEpsilon,
+  requestFromStore,
 } from './runner/judge';
 import { clearCache, touchCache } from './utils';
 import { checkDeps, installDep } from './depHandler';
@@ -39,6 +40,7 @@ export default class AppUpdater {
 let mainWindow: BrowserWindow | null = null;
 
 // Subscribe to events
+ipcMain.on(CHANNELS.REQUEST_FROM_STORE, requestFromStore);
 ipcMain.on(CHANNELS.CHECK_DEPS, checkDeps);
 ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);

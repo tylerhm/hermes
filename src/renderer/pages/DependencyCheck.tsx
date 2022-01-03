@@ -3,7 +3,7 @@ import { Button, List, message, Spin, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { DepType, InstallType } from '../utils/Types';
+import { DepType, InstallType } from '../utils/types';
 
 type DepInfoType = {
   installable: boolean;

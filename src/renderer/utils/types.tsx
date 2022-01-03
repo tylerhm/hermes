@@ -1,4 +1,3 @@
-export type FileKeyType = 'source' | 'data' | 'input' | 'output';
 export type VerdictType =
   | 'UNKNOWN'
   | 'AC'
@@ -15,3 +14,10 @@ export type InfoType = 'input' | 'output' | 'userOutput';
 export type CheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
 export type DepType = 'Python 3' | 'Apollo' | 'xdg-open-wsl' | 'wsl';
 export type InstallType = 'pip';
+export type StoreKeyType =
+  | 'source'
+  | 'data'
+  | 'time-limit'
+  | 'checker-type'
+  | 'epsilon'
+  | 'custom-checker-path';

@@ -2,6 +2,7 @@
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
+import { existsSync } from 'fs';
 import { maybeWslifyPath, spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
@@ -14,7 +15,17 @@ import {
 import CHANNELS from '../channels';
 import compile from './compile';
 
-const STORE_KEYS = {
+// Store for the main thread
+const store = new Store();
+
+type StoreKeyType =
+  | 'source'
+  | 'data'
+  | 'time-limit'
+  | 'checker-type'
+  | 'epsilon'
+  | 'custom-checker-path';
+const STORE_KEYS: { [key: string]: StoreKeyType } = {
   SOURCE: 'source',
   DATA: 'data',
   TIME_LIMIT: 'time-limit',
@@ -27,14 +38,32 @@ const getDataLocationStoreKey = (caseID: string) => {
   return `casePaths.${caseID}`;
 };
 
-// Store for the main thread. Get rid of old data
-const store = new Store();
-store.clear();
+// Grab existing data from store if it exists
+const PATH_KEYS: Array<StoreKeyType> = [
+  'custom-checker-path',
+  'data',
+  'source',
+];
+export const requestFromStore = (
+  event: Electron.IpcMainEvent,
+  key: StoreKeyType
+) => {
+  const res = store.get(key, null);
+  if (res != null) {
+    if (PATH_KEYS.includes(key))
+      event.reply(
+        CHANNELS.FOUND_IN_STORE,
+        key,
+        getFileNameFromPath(res as string)
+      );
+    else event.reply(CHANNELS.FOUND_IN_STORE, key, res);
+  }
+};
 
 // Open file dialog and save selections by key.
 export const selectFile = async (
   event: Electron.IpcMainEvent,
-  key: string,
+  key: StoreKeyType,
   isDir: boolean
 ) => {
   if (!Object.values(STORE_KEYS).includes(key)) {
@@ -141,6 +170,16 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     (checkerType === 'custom' && customCheckerPath === 'NA')
   ) {
     event.reply(CHANNELS.MISSING_INFO);
+    return;
+  }
+
+  if (!existsSync(source)) {
+    event.reply(CHANNELS.FILE_NOT_EXIST, source);
+    return;
+  }
+
+  if (!existsSync(data)) {
+    event.reply(CHANNELS.FOLDER_NOT_EXIST, source);
     return;
   }
 

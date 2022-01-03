@@ -10,12 +10,11 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
   useEffect(() => {
     const notifyError = (content: string) => {
       setError(true);
-      message.error({
-        content,
-        style: {
-          marginTop: '85vh',
-        },
+      message.config({
+        top: 250,
+        duration: 1,
       });
+      message.error(content);
       onError();
     };
 
@@ -24,6 +23,12 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
     };
     const notifyMissingInfo = () => {
       notifyError('Fill all required fields');
+    };
+    const notifyInvalidFile = (source: string) => {
+      notifyError(`${source} does not exist`);
+    };
+    const notifyInvalidFolder = (folder: string) => {
+      notifyError(`${folder} does not exist`);
     };
     const notifyInvalidData = () => {
       notifyError('Invalid data format');
@@ -50,6 +55,10 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
     });
 
     removers.push(eventHandler.on(CHANNELS.MISSING_INFO, notifyMissingInfo));
+    removers.push(eventHandler.on(CHANNELS.FILE_NOT_EXIST, notifyInvalidFile));
+    removers.push(
+      eventHandler.on(CHANNELS.FOLDER_NOT_EXIST, notifyInvalidFolder)
+    );
     removers.push(eventHandler.on(CHANNELS.INVALID_DATA, notifyInvalidData));
     removers.push(
       eventHandler.on(CHANNELS.COMPILATION_ERROR, notifyCompilationError)
