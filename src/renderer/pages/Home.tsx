@@ -2,46 +2,47 @@ import { useEffect, useState } from 'react';
 import { Space } from 'antd';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { FileKeyType } from '../utils/Types';
+import { StoreKeyType } from '../utils/types';
 import FileSelectionRow from '../components/FileSelectionRow';
 import NumberSelectionRow from '../components/NumberSelectionRow';
 import JudgeButton from '../components/JudgeButton';
 import Results from '../components/Results';
 import CheckerTypeSelectorRow from '../components/CheckerTypeSelectorRow';
 
-type FileData = {
-  [K in FileKeyType]?: string;
-};
-
-const FILE_KEYS = {
-  SOURCE: 'source',
-  DATA: 'data',
-  INPUT: 'input',
-  OUTPUT: 'output',
-};
-
 export default function Home() {
-  const [fileInfo, setFileInfo] = useState<FileData>({});
+  const [sourceName, setSourceName] = useState<string>();
+  const [dataFolder, setDataFolder] = useState<string>();
+  const [timeLimit, setTimeLimit] = useState<number>(1);
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  const updateFileName = (key: FileKeyType, name: string) => {
-    setFileInfo({ ...fileInfo, [key]: name });
+  const updateData = (key: StoreKeyType, res: unknown) => {
+    if (key === 'time-limit') setTimeLimit(res as number);
+    else if (key === 'source') setSourceName(res as string);
+    else if (key === 'data') setDataFolder(res as string);
   };
 
   useEffect(() => {
-    const remover = eventHandler.on(CHANNELS.FILE_SELECTED, updateFileName);
+    const removers: Array<() => void> = [];
+    removers.push(eventHandler.on(CHANNELS.FILE_SELECTED, updateData));
+    removers.push(eventHandler.on(CHANNELS.FOUND_IN_STORE, updateData));
+
+    // Request any cached data
+    eventHandler.requestFromStore('source');
+    eventHandler.requestFromStore('data');
+    eventHandler.requestFromStore('time-limit');
 
     return () => {
-      remover();
+      removers.forEach((remover) => remover());
     };
-  }, [updateFileName]);
+  }, []);
 
-  const onSelectFile = (key: FileKeyType) => {
-    eventHandler.setFile(key, key === FILE_KEYS.DATA);
+  const onSelectFile = (key: StoreKeyType) => {
+    eventHandler.setFile(key, key === 'data');
   };
 
   const onChangeTimeLimit = (limit: number) => {
+    updateData('time-limit', limit);
     eventHandler.setTimeLimit(limit);
   };
 
@@ -57,20 +58,20 @@ export default function Home() {
         <FileSelectionRow
           label="Source"
           placeholder="Select file"
-          value={fileInfo.source}
+          value={sourceName}
           onClick={() => onSelectFile('source')}
         />
         <FileSelectionRow
           label="Data"
           placeholder="Select directory"
-          value={fileInfo.data}
+          value={dataFolder}
           onClick={() => onSelectFile('data')}
         />
         <NumberSelectionRow
           label="Time Limit"
           type="integer"
           min={1}
-          defaultValue={1}
+          value={timeLimit}
           units="seconds"
           onChange={onChangeTimeLimit}
         />

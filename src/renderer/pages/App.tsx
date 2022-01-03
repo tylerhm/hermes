@@ -7,7 +7,8 @@ import {
   DepType,
   InfoType,
   InstallType,
-} from '../utils/Types';
+  StoreKeyType,
+} from '../utils/types';
 
 declare global {
   interface Window {
@@ -15,6 +16,7 @@ declare global {
       ipcRenderer: {
         on: (listener: string, func: unknown) => () => void;
         once: (listener: string, func: unknown) => void;
+        requestFromStore: (key: StoreKeyType) => void;
         checkDeps: () => void;
         installDep: (
           dep: DepType,

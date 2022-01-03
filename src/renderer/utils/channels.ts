@@ -1,4 +1,6 @@
 const CHANNELS = {
+  FOUND_IN_STORE: 'electron-found-in-store',
+
   DEPS_CHECKED: 'electron-deps-checked',
 
   DEP_INSTALLED: 'electron-dep-installed',

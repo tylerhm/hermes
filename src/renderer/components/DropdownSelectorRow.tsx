@@ -1,18 +1,22 @@
 import { DownOutlined } from '@ant-design/icons';
 import { Menu, Dropdown, Button, Row, Col } from 'antd';
-import { useState } from 'react';
 
 type Props = {
   label: string;
   choices: Array<string>;
+  placeholder?: string;
+  value?: string;
   onSelect: (value: string) => void;
 };
 
-const DropdownSelectorRow = ({ label, choices, onSelect }: Props) => {
-  const [value, setValue] = useState<string>(choices[0]);
-
+const DropdownSelectorRow = ({
+  label,
+  choices,
+  placeholder,
+  value,
+  onSelect,
+}: Props) => {
   const choose = (newValue: string) => {
-    setValue(newValue);
     onSelect(newValue);
   };
 
@@ -32,12 +36,17 @@ const DropdownSelectorRow = ({ label, choices, onSelect }: Props) => {
       <Col span={12}>
         <Dropdown overlay={menu} trigger={['click']}>
           <Button>
-            {value} <DownOutlined />
+            {value ?? placeholder} <DownOutlined />
           </Button>
         </Dropdown>
       </Col>
     </Row>
   );
+};
+
+DropdownSelectorRow.defaultProps = {
+  placeholder: undefined,
+  value: undefined,
 };
 
 export default DropdownSelectorRow;

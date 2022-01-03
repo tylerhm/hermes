@@ -1,4 +1,7 @@
 const CHANNELS = {
+  REQUEST_FROM_STORE: 'renderer-request-from-store',
+  FOUND_IN_STORE: 'electron-found-in-store',
+
   CHECK_DEPS: 'renderer-check-deps',
   DEPS_CHECKED: 'electron-deps-checked',
 

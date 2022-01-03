@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { Response } from '../utils/Types';
+import { Response } from '../utils/types';
 
 type ResultsType = {
   [id: string]: Response;

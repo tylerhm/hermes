@@ -6,7 +6,7 @@ interface Props {
   type: NumberType;
   min: number;
   max?: number;
-  defaultValue: number;
+  value: number;
   units?: string | undefined;
   onChange: (newNumber: number) => void;
 }
@@ -16,7 +16,7 @@ const NumberSelectionRow = ({
   type,
   min,
   max,
-  defaultValue,
+  value,
   units,
   onChange,
 }: Props) => {
@@ -29,7 +29,7 @@ const NumberSelectionRow = ({
           min={min}
           max={max}
           stringMode={type === 'float'}
-          defaultValue={defaultValue}
+          value={value}
           onChange={onChange}
           addonAfter={units}
         />
