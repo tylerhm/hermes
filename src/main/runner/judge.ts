@@ -2,6 +2,7 @@
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
+import { existsSync } from 'fs';
 import { maybeWslifyPath, spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
@@ -169,6 +170,16 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     (checkerType === 'custom' && customCheckerPath === 'NA')
   ) {
     event.reply(CHANNELS.MISSING_INFO);
+    return;
+  }
+
+  if (!existsSync(source)) {
+    event.reply(CHANNELS.FILE_NOT_EXIST, source);
+    return;
+  }
+
+  if (!existsSync(data)) {
+    event.reply(CHANNELS.FOLDER_NOT_EXIST, source);
     return;
   }
 
