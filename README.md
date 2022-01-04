@@ -53,6 +53,11 @@ npm start
 
 To package apps for the local platform:
 
+1. Compile binaries and ship them to correct location
+```bash
+make
+```
+2. Package
 ```bash
 npm run package
 ```
