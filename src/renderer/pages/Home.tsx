@@ -22,6 +22,7 @@ export default function Home() {
     else if (key === 'data') setDataFolder(res as string);
   };
 
+  // Request store data, and listen on updates
   useEffect(() => {
     const removers: Array<() => void> = [];
     removers.push(eventHandler.on(CHANNELS.FILE_SELECTED, updateData));

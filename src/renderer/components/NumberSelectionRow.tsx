@@ -11,6 +11,7 @@ interface Props {
   onChange: (newNumber: number) => void;
 }
 
+// Row with number selection capabilities
 const NumberSelectionRow = ({
   label,
   type,

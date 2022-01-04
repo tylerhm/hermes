@@ -10,6 +10,7 @@ import {
   StoreKeyType,
 } from '../utils/types';
 
+// Interface so that typescript doesn't get mad about main -> renderer comms
 declare global {
   interface Window {
     electron: {

@@ -14,6 +14,7 @@ const CHECKER_TYPE_OPTIONS: Array<CheckerTypeType> = [
   'custom',
 ];
 
+// Row with dropdown to select checker
 const CheckerTypeSelectorRow = () => {
   const [checkerType, setCheckerType] = useState<CheckerTypeType>(
     CHECKER_TYPE_OPTIONS[0]
@@ -27,12 +28,14 @@ const CheckerTypeSelectorRow = () => {
     if (key === 'custom-checker-path') setCheckerBinaryPath(newPath);
   };
 
+  // Handle incoming information from existing store
   const foundInStore = (key: StoreKeyType, res: unknown) => {
     if (key === 'custom-checker-path') setCheckerBinaryPath(res as string);
     else if (key === 'checker-type') setCheckerType(res as CheckerTypeType);
     else if (key === 'epsilon') setEpsilon(res as number);
   };
 
+  // Ask for all information from store, and listen on file selections
   useEffect(() => {
     const removers: Array<() => void> = [];
     removers.push(
@@ -43,6 +46,7 @@ const CheckerTypeSelectorRow = () => {
     eventHandler.requestFromStore('checker-type');
     eventHandler.requestFromStore('custom-checker-path');
     eventHandler.requestFromStore('epsilon');
+
     return () => {
       removers.forEach((remover) => remover());
     };
@@ -58,6 +62,7 @@ const CheckerTypeSelectorRow = () => {
     eventHandler.setEpsilon(newEpsilon);
   };
 
+  // Returns the necessary supplementary component for a given checker type.
   const getCheckerMetaComponent = () => {
     if (checkerType === 'epsilon')
       return (

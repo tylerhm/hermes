@@ -7,9 +7,11 @@ type ResultsType = {
   [id: string]: Response;
 };
 
+// Hook to listen to current results status
 const useResults = () => {
   const [results, setResults] = useState<ResultsType>({});
 
+  // Listen to updates in results, and set necessary data.
   useEffect(() => {
     const resetResults = () => {
       setResults({});

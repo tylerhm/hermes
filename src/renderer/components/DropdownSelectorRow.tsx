@@ -9,6 +9,7 @@ type Props = {
   onSelect: (value: string) => void;
 };
 
+// Row with a dropdown selection option
 const DropdownSelectorRow = ({
   label,
   choices,
@@ -20,6 +21,7 @@ const DropdownSelectorRow = ({
     onSelect(newValue);
   };
 
+  // Create menu
   const menu = (
     <Menu>
       {choices.map((choice) => (

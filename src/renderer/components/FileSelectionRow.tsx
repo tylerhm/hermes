@@ -7,6 +7,7 @@ interface Props {
   onClick: () => void;
 }
 
+// Row to aide in the file selection process.
 const FileSelectionRow = ({ label, placeholder, value, onClick }: Props) => {
   return (
     <Row style={{ width: '100%' }}>

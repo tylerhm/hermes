@@ -18,6 +18,7 @@ import compile from './compile';
 // Store for the main thread
 const store = new Store();
 
+// All valid direct access store keys
 type StoreKeyType =
   | 'source'
   | 'data'
@@ -34,6 +35,7 @@ const STORE_KEYS: { [key: string]: StoreKeyType } = {
   CUSTOM_CHECKER_PATH: 'custom-checker-path',
 };
 
+// Returns store key for a given case
 const getDataLocationStoreKey = (caseID: string) => {
   return `casePaths.${caseID}`;
 };
@@ -140,6 +142,7 @@ export const openCaseInfo = async (
   shell.openPath(absPath);
 };
 
+// ALl valid verdicts, and responses
 type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
 type ResponseType = {
   verdict: VerdictType;
@@ -148,9 +151,15 @@ type ResponseType = {
 type ResultsType = {
   [inputId: string]: ResponseType;
 };
+
+// Main judge function
 export const judge = async (event: Electron.IpcMainEvent) => {
+  /*
+   * PREP
+   */
   event.reply(CHANNELS.BEGIN_EVALUATION);
 
+  // Get all data from store
   const source = store.get(STORE_KEYS.SOURCE, null) as string | null;
   const data = store.get(STORE_KEYS.DATA, null) as string | null;
   const timeLimit = store.get(STORE_KEYS.TIME_LIMIT, 1) as number;
@@ -164,6 +173,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     'NA'
   ) as string;
 
+  // If we are missing critical info, then halt
   if (
     source == null ||
     data == null ||
@@ -173,19 +183,21 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
+  // If source or data does not exists, halt
   if (!existsSync(source)) {
     event.reply(CHANNELS.FILE_NOT_EXIST, source);
     return;
   }
-
   if (!existsSync(data)) {
     event.reply(CHANNELS.FOLDER_NOT_EXIST, source);
     return;
   }
 
+  // Process the source information
   const ext = getExtension(source);
   const lang = getLang(ext);
 
+  // If the language is not supported, halt
   if (lang == null) {
     event.reply(CHANNELS.UNSUPPORTED_LANGUAGE, ext);
     return;
@@ -221,6 +233,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     return trimExtension(absPath);
   });
 
+  // Verify that every input has an output
   const allCasesValid = inputs.every((absPath) => {
     return outputs.includes(absPath);
   });
@@ -230,6 +243,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
+  // Simultaneously map to ids and store their locations in store
   const inputIds = inputs.map((absPath) => {
     const caseID = getFileNameFromPath(absPath);
     store.set(getDataLocationStoreKey(caseID), path.dirname(absPath));
@@ -243,6 +257,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
+  // Populate results map with unkown information
   const results: ResultsType = inputs.reduce((curRes, absPath) => {
     return {
       ...curRes,
@@ -252,12 +267,6 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       },
     };
   }, {});
-
-  type MessageType = {
-    inputId: string;
-    verdict: VerdictType;
-    messages: Array<string>;
-  };
 
   // Normalize all paths Windows -> WSL bridge users
   const normalizedFastJudgeBinary = await maybeWslifyPath(
@@ -291,6 +300,7 @@ export const judge = async (event: Electron.IpcMainEvent) => {
       ? customCheckerPath
       : await maybeWslifyPath(customCheckerPath);
 
+  // Create instance of fast judge with normalized data
   const judger = spawnCommand(normalizedFastJudgeBinary, [
     normalizedCachePath,
     getFileNameFromPath(compiledPath),
@@ -307,6 +317,14 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     normalizedCustomCheckerPath,
   ]);
 
+  // Message recieved from stdout
+  type MessageType = {
+    inputId: string;
+    verdict: VerdictType;
+    messages: Array<string>;
+  };
+
+  // Listen on all updates from the fastJudge
   let numJudged = 0;
   judger.stdout.on('data', (msg) => {
     console.log(msg.toString());

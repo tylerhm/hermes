@@ -58,14 +58,17 @@ export const langSpecific = (
   return options[lang];
 };
 
+// Ensure that the cache exists
 export const touchCache = () => {
   makeDir(paths.cache);
 };
 
+// Clear the cache
 export const clearCache = () => {
   if (fs.existsSync(paths.cache)) del.sync([paths.cache], { force: true });
 };
 
+// Get path to the cache
 export const getCachePath = (fileName?: string) => {
   return fileName ? path.join(paths.cache, fileName) : paths.cache;
 };

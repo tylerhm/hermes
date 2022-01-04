@@ -54,6 +54,8 @@ type PopoverProps = {
   caseID: string;
   messages: Array<string>;
 };
+
+// Render the popover content of a result
 const PopoverContent = ({ caseID, messages }: PopoverProps) => {
   const requestInfo = (infoType: InfoType) => {
     eventHandler.openCaseInfo(caseID, infoType);
@@ -82,6 +84,7 @@ const PopoverContent = ({ caseID, messages }: PopoverProps) => {
   );
 };
 
+// Render each result as a bubble button
 const Results = () => {
   const results = useResults();
 

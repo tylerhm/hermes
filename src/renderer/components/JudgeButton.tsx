@@ -4,6 +4,7 @@ import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
 import JudgePrepProgress from './JudgePrepProgress';
 
+// Button to commence judge process
 const JudgeButton = () => {
   const [spin, setSpin] = useState<boolean>(false);
 

@@ -3,10 +3,12 @@ import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
 
+// Hook that manages the preparation status of a judge session.
 const usePrepStatus = (steps: Array<string>, onError: () => void) => {
   const [progress, setProgress] = useState<number>(0);
   const [error, setError] = useState<boolean>();
 
+  // Set up all error listeners and progress updaters
   useEffect(() => {
     const notifyError = (content: string) => {
       setError(true);
@@ -40,6 +42,7 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
       notifyError('Compilation error');
     };
 
+    // Each step should take us 100 / steps.length distance forward in progress
     const prog = 100 / steps.length;
     const events = steps.reduce((curEvents, step, index) => {
       return {
