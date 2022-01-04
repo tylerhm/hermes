@@ -15,6 +15,8 @@ const CHANNELS = {
   INVALID_DATA: 'electron-invalid-data',
   DONE_COLLECT_DATA: 'electron-done-collect-data',
 
+  UNSUPPORTED_LANGUAGE: 'electron-unsupported-language',
+
   BEGIN_COMPILING: 'electron-begin-compiling',
   COMPILATION_ERROR: 'electron-compilation-error',
   DONE_COMPILING: 'electron-done-compiling',

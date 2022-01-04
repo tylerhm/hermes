@@ -31,9 +31,8 @@ export const findByExtension = (dataDir: string, ext: string) => {
 };
 
 export type LangType = 'cpp' | 'c' | 'java' | 'py';
-export const getLang: (ext: string) => LangType = (ext: string) => {
+export const getLang: (ext: string) => LangType | null = (ext: string) => {
   switch (ext) {
-    default:
     case 'C':
     case 'cc':
     case 'cpp':
@@ -44,6 +43,8 @@ export const getLang: (ext: string) => LangType = (ext: string) => {
       return 'java';
     case 'py':
       return 'py';
+    default:
+      return null;
   }
 };
 

@@ -24,6 +24,9 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
     const notifyMissingInfo = () => {
       notifyError('Fill all required fields');
     };
+    const notifyUnsupportedLanguage = (ext: string) => {
+      notifyError(`Unsupported file extension: ${ext}`);
+    };
     const notifyInvalidFile = (source: string) => {
       notifyError(`${source} does not exist`);
     };
@@ -55,6 +58,9 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
     });
 
     removers.push(eventHandler.on(CHANNELS.MISSING_INFO, notifyMissingInfo));
+    removers.push(
+      eventHandler.on(CHANNELS.UNSUPPORTED_LANGUAGE, notifyUnsupportedLanguage)
+    );
     removers.push(eventHandler.on(CHANNELS.FILE_NOT_EXIST, notifyInvalidFile));
     removers.push(
       eventHandler.on(CHANNELS.FOLDER_NOT_EXIST, notifyInvalidFolder)

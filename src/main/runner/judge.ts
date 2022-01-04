@@ -183,13 +183,18 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
+  const ext = getExtension(source);
+  const lang = getLang(ext);
+
+  if (lang == null) {
+    event.reply(CHANNELS.UNSUPPORTED_LANGUAGE, ext);
+    return;
+  }
+
   /*
    * COMPILATION
    */
   event.reply(CHANNELS.BEGIN_COMPILING);
-
-  const ext = getExtension(source);
-  const lang = getLang(ext);
 
   // Compile the code
   let compiledPath: string;
