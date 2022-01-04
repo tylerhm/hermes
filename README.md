@@ -14,6 +14,14 @@ Of the above, the following are installable through Hermes UI:
 - [Apollo](https://github.com/TylerMathis/apollo)
 - [xdg-open-wsl](https://github.com/cpbotha/xdg-open-wsl) *Only for WSL users*
 
+## Supported Languages
+
+Hermes currently supports the following languages:
+* C
+* C++
+* Java
+* Python
+
 ## Starting Development
 
 Ensure that you have the following dependencies
@@ -33,6 +41,13 @@ Start the app in the `dev` environment:
 ```bash
 npm start
 ```
+
+### Adding Language Support
+
+1. Add your language identifier to [`src/main/utils.ts`](https://github.com/TylerMathis/hermes/blob/83313fe9243a5ed6d861b6548bc1ed9461f78bb4/src/main/utils.ts#L33-L48), and include all possible file extensions for your language in the `getLang()` switch.
+2. Add your `lang type`'s compilation directive to [`src/main/runner/compile.ts`](https://github.com/TylerMathis/hermes/blob/83313fe9243a5ed6d861b6548bc1ed9461f78bb4/src/main/runner/compile.ts#L21-L26). If your language is interpretted rather than compiled, follow the example for `python`, copying your file to the cache.
+3. Add your `lang type`'s execution directive to [`src/main/runner/runguard.cpp`](https://github.com/TylerMathis/hermes/blob/83313fe9243a5ed6d861b6548bc1ed9461f78bb4/src/main/runner/runguard.cpp#L35-L41), and ensure to pipe the input and output to the locations provided in the script.
+4. Submit a PR with evidence of Hermes compiling, running, and judging a solution in your language.
 
 ## Packaging for Production
 
