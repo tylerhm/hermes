@@ -25,6 +25,15 @@ contextBridge.exposeInMainWorld('electron', {
     setEpsilon(epsilon) {
       ipcRenderer.send(CHANNELS.SET_EPSILON, epsilon);
     },
+    setIsCustomInvocation(isCustomInvocation) {
+      ipcRenderer.send(CHANNELS.SET_IS_CUSTOM_INVOCATION, isCustomInvocation);
+    },
+    setCustomInvocationInput(customInvocationInput) {
+      ipcRenderer.send(
+        CHANNELS.SET_CUSTOM_INVOCATION_INPUT,
+        customInvocationInput
+      );
+    },
     judge() {
       ipcRenderer.send(CHANNELS.JUDGE);
     },

@@ -25,7 +25,9 @@ type StoreKeyType =
   | 'time-limit'
   | 'checker-type'
   | 'epsilon'
-  | 'custom-checker-path';
+  | 'custom-checker-path'
+  | 'is-custom-invocation'
+  | 'custom-invocation-input';
 const STORE_KEYS: { [key: string]: StoreKeyType } = {
   SOURCE: 'source',
   DATA: 'data',
@@ -33,6 +35,8 @@ const STORE_KEYS: { [key: string]: StoreKeyType } = {
   CHECKER_TYPE: 'checker-type',
   EPSILON: 'epsilon',
   CUSTOM_CHECKER_PATH: 'custom-checker-path',
+  IS_CUSTOM_INVOCATION: 'is-custom-invocation',
+  CUSTOM_INVOCATION_INPUT: 'custom-invocation-input',
 };
 
 // Returns store key for a given case
@@ -110,6 +114,22 @@ export const setEpsilon = async (
   epsilon: number
 ) => {
   store.set(STORE_KEYS.EPSILON, epsilon);
+};
+
+// Set the custom invocation status in the store
+export const setIsCustomInvocation = async (
+  _event: Electron.IpcMainEvent,
+  isCustomInvocation: boolean
+) => {
+  store.set(STORE_KEYS.IS_CUSTOM_INVOCATION, isCustomInvocation);
+};
+
+// Set the custom invocation input in the store
+export const setCustomInvocationInput = async (
+  _event: Electron.IpcMainEvent,
+  customInvocationInput: string
+) => {
+  store.set(STORE_KEYS.CUSTOM_INVOCATION_INPUT, customInvocationInput);
 };
 
 // Attempt to open the requested info about a case

@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Space } from 'antd';
+import TextInputRow from '../components/TextInputRow';
+import ToggleRow from '../components/ToggleRow';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
 import { StoreKeyType } from '../utils/types';
@@ -13,6 +15,8 @@ export default function Home() {
   const [sourceName, setSourceName] = useState<string>();
   const [dataFolder, setDataFolder] = useState<string>();
   const [timeLimit, setTimeLimit] = useState<number>(1);
+  const [isCustomInvocation, setIsCustomInvocation] = useState<boolean>(false);
+  const [customInvocationInput, setCustomInvocationInput] = useState<string>();
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -20,6 +24,10 @@ export default function Home() {
     if (key === 'time-limit') setTimeLimit(res as number);
     else if (key === 'source') setSourceName(res as string);
     else if (key === 'data') setDataFolder(res as string);
+    else if (key === 'is-custom-invocation')
+      setIsCustomInvocation(res as boolean);
+    else if (key === 'custom-invocation-input')
+      setCustomInvocationInput(res as string);
   };
 
   // Request store data, and listen on updates
@@ -32,6 +40,8 @@ export default function Home() {
     eventHandler.requestFromStore('source');
     eventHandler.requestFromStore('data');
     eventHandler.requestFromStore('time-limit');
+    eventHandler.requestFromStore('is-custom-invocation');
+    eventHandler.requestFromStore('custom-invocation-input');
 
     return () => {
       removers.forEach((remover) => remover());
@@ -45,6 +55,16 @@ export default function Home() {
   const onChangeTimeLimit = (limit: number) => {
     updateData('time-limit', limit);
     eventHandler.setTimeLimit(limit);
+  };
+
+  const onChangeIsCustomInvocation = (customInvocation: boolean) => {
+    updateData('is-custom-invocation', customInvocation);
+    eventHandler.setIsCustomInvocation(customInvocation);
+  };
+
+  const onChangeCustomInvocationInput = (newCustomInvocationInput: string) => {
+    updateData('custom-invocation-input', newCustomInvocationInput);
+    eventHandler.setCustomInvocationInput(newCustomInvocationInput);
   };
 
   return (
@@ -62,12 +82,23 @@ export default function Home() {
           value={sourceName}
           onClick={() => onSelectFile('source')}
         />
-        <FileSelectionRow
-          label="Data"
-          placeholder="Select directory"
-          value={dataFolder}
-          onClick={() => onSelectFile('data')}
-        />
+        {
+          // Select custom input for custom invoc, and data for regular
+          isCustomInvocation ? (
+            <TextInputRow
+              label="Custom Input"
+              defaultValue={customInvocationInput}
+              onChange={onChangeCustomInvocationInput}
+            />
+          ) : (
+            <FileSelectionRow
+              label="Data"
+              placeholder="Select directory"
+              value={dataFolder}
+              onClick={() => onSelectFile('data')}
+            />
+          )
+        }
         <NumberSelectionRow
           label="Time Limit"
           type="integer"
@@ -76,7 +107,12 @@ export default function Home() {
           units="seconds"
           onChange={onChangeTimeLimit}
         />
-        <CheckerTypeSelectorRow />
+        {isCustomInvocation ? null : <CheckerTypeSelectorRow />}
+        <ToggleRow
+          label="Custom Invocation?"
+          checked={isCustomInvocation}
+          onChange={onChangeIsCustomInvocation}
+        />
         <JudgeButton />
         <Results />
       </Space>

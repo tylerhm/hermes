@@ -35,7 +35,7 @@ const DropdownSelectorRow = ({
   return (
     <Row style={{ width: '100%' }}>
       <Col span={10}>{label}</Col>
-      <Col span={12}>
+      <Col span={14}>
         <Dropdown overlay={menu} trigger={['click']}>
           <Button>
             {value ?? placeholder} <DownOutlined />

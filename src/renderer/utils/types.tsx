@@ -20,4 +20,6 @@ export type StoreKeyType =
   | 'time-limit'
   | 'checker-type'
   | 'epsilon'
-  | 'custom-checker-path';
+  | 'custom-checker-path'
+  | 'is-custom-invocation'
+  | 'custom-invocation-input';

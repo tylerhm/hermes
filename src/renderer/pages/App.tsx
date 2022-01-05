@@ -28,6 +28,8 @@ declare global {
         setTimeLimit: (limit: number) => void;
         setCheckerType: (checkerType: CheckerTypeType) => void;
         setEpsilon: (epsilon: number) => void;
+        setIsCustomInvocation: (isCustomInvocation: boolean) => void;
+        setCustomInvocationInput: (customInvocationInput: string) => void;
         judge: () => void;
         openCaseInfo: (caseID: string, infoType: InfoType) => void;
       };

@@ -16,6 +16,9 @@ const CHANNELS = {
   SET_CHECKER_TYPE: 'renderer-set-checker-type',
   SET_EPSILON: 'renderer-set-epsilon',
 
+  SET_IS_CUSTOM_INVOCATION: 'renderer-set-is-custom-invocation',
+  SET_CUSTOM_INVOCATION_INPUT: 'renderer-set-custom-invocation-input',
+
   JUDGE: 'renderer-judge',
 
   BEGIN_EVALUATION: 'electron-begin-evaluation',
