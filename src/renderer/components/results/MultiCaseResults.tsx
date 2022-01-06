@@ -9,9 +9,9 @@ import {
 } from '@ant-design/icons';
 import { Popover } from 'antd';
 import Button, { ButtonType } from 'antd-button-color';
-import eventHandler from '../utils/eventHandler';
-import { InfoType, VerdictType } from '../utils/types';
-import useResults from '../hooks/useResults';
+import eventHandler from '../../utils/eventHandler';
+import { InfoType, VerdictType } from '../../utils/types';
+import { MultiCaseResultsType } from '../../hooks/useResults';
 
 type ResultsMetaType = {
   [K in VerdictType]: {
@@ -84,10 +84,12 @@ const PopoverContent = ({ caseID, messages }: PopoverProps) => {
   );
 };
 
-// Render each result as a bubble button
-const Results = () => {
-  const results = useResults();
+type Props = {
+  results: MultiCaseResultsType;
+};
 
+// Render each result as a bubble button
+const MultiCaseResults = ({ results }: Props) => {
   return (
     <div
       style={{
@@ -130,4 +132,4 @@ const Results = () => {
   );
 };
 
-export default Results;
+export default MultiCaseResults;

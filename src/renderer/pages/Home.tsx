@@ -8,7 +8,7 @@ import { StoreKeyType } from '../utils/types';
 import FileSelectionRow from '../components/FileSelectionRow';
 import NumberSelectionRow from '../components/NumberSelectionRow';
 import JudgeButton from '../components/JudgeButton';
-import Results from '../components/Results';
+import Results from '../components/results/Results';
 import CheckerTypeSelectorRow from '../components/CheckerTypeSelectorRow';
 
 export default function Home() {
@@ -114,7 +114,7 @@ export default function Home() {
           onChange={onChangeIsCustomInvocation}
         />
         <JudgeButton />
-        <Results />
+        <Results isCustomInvocation={isCustomInvocation} />
       </Space>
     </div>
   );
