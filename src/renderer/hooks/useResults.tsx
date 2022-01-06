@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { Response } from '../utils/types';
+import { ResponseType } from '../utils/types';
 
 export type MultiCaseResultsType = {
-  [id: string]: Response;
+  [id: string]: ResponseType;
 };
 
 export type CustomInvocationResultType = {
   stdout: string;
-  response: Response | null;
+  response: ResponseType | null;
 };
 
 type ResultsType = MultiCaseResultsType | CustomInvocationResultType;

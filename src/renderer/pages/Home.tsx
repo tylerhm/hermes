@@ -113,7 +113,7 @@ export default function Home() {
           checked={isCustomInvocation}
           onChange={onChangeIsCustomInvocation}
         />
-        <JudgeButton />
+        <JudgeButton isCustomInvocation={isCustomInvocation} />
         <Results isCustomInvocation={isCustomInvocation} />
       </Space>
     </div>

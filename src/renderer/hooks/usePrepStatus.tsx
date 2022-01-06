@@ -20,8 +20,9 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
       onError();
     };
 
-    const cancelError = () => {
+    const resetMeta = () => {
       setError(false);
+      setProgress(0);
     };
     const notifyMissingInfo = () => {
       notifyError('Fill all required fields');
@@ -54,7 +55,7 @@ const usePrepStatus = (steps: Array<string>, onError: () => void) => {
     }, {});
 
     const removers: Array<() => void> = [];
-    removers.push(eventHandler.on(CHANNELS.BEGIN_COLLECT_DATA, cancelError));
+    removers.push(eventHandler.on(CHANNELS.BEGIN_EVALUATION, resetMeta));
 
     Object.entries(events).forEach(([event, registerEvent]) => {
       removers.push(eventHandler.on(event, registerEvent));

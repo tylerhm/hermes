@@ -4,8 +4,12 @@ import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
 import JudgePrepProgress from './JudgePrepProgress';
 
+type Props = {
+  isCustomInvocation: boolean;
+};
+
 // Button to commence judge process
-const JudgeButton = () => {
+const JudgeButton = ({ isCustomInvocation }: Props) => {
   const [spin, setSpin] = useState<boolean>(false);
 
   const unSpin = () => {
@@ -35,6 +39,7 @@ const JudgeButton = () => {
         Judge!
       </Button>
       <JudgePrepProgress
+        isCustomInvocation={isCustomInvocation}
         onError={() => {
           setSpin(false);
         }}

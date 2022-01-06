@@ -6,7 +6,7 @@ export type VerdictType =
   | 'TLE'
   | 'RTE'
   | 'INTERNAL_ERROR';
-export type Response = {
+export type ResponseType = {
   verdict: VerdictType;
   messages: Array<string>;
 };
