@@ -20,7 +20,12 @@ const MultiCaseResults = ({ results }: Props) => {
       }}
     >
       {Object.entries(results).map(([caseID, result]) => (
-        <ResultButton identifier={caseID} response={result} shape="circle" />
+        <ResultButton
+          identifier={caseID}
+          response={result}
+          shape="circle"
+          isCustomInvocation={false}
+        />
       ))}
     </div>
   );
