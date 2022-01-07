@@ -2,22 +2,39 @@ import { Space } from 'antd';
 import { useEffect, useState } from 'react';
 import CHANNELS from '../utils/channels';
 import eventHandler from '../utils/eventHandler';
-import { CheckerTypeType, StoreKeyType } from '../utils/types';
+import {
+  MultiCaseCheckerTypeType,
+  CustomInvocationCheckerTypeType,
+  StoreKeyType,
+} from '../utils/types';
 import DropdownSelectorRow from './DropdownSelectorRow';
 import FileSelectionRow from './FileSelectionRow';
 import NumberSelectionRow from './NumberSelectionRow';
 
-const CHECKER_TYPE_OPTIONS: Array<CheckerTypeType> = [
+const MULTI_CASE_CHECKER_TYPE_OPTIONS: Array<MultiCaseCheckerTypeType> = [
   'diff',
   'token',
   'epsilon',
   'custom',
 ];
 
+const CUSTOM_INVOCATION_CHECKER_TYPE_OPTIONS: Array<CustomInvocationCheckerTypeType> =
+  ['none', 'custom'];
+
+type CheckerTypeType =
+  | MultiCaseCheckerTypeType
+  | CustomInvocationCheckerTypeType;
+
+type Props = {
+  isCustomInvocation: boolean;
+};
+
 // Row with dropdown to select checker
-const CheckerTypeSelectorRow = () => {
+const CheckerTypeSelectorRow = ({ isCustomInvocation }: Props) => {
   const [checkerType, setCheckerType] = useState<CheckerTypeType>(
-    CHECKER_TYPE_OPTIONS[0]
+    isCustomInvocation
+      ? CUSTOM_INVOCATION_CHECKER_TYPE_OPTIONS[0]
+      : MULTI_CASE_CHECKER_TYPE_OPTIONS[0]
   );
   const [checkerBinaryPath, setCheckerBinaryPath] = useState<
     string | undefined
@@ -31,7 +48,10 @@ const CheckerTypeSelectorRow = () => {
   // Handle incoming information from existing store
   const foundInStore = (key: StoreKeyType, res: unknown) => {
     if (key === 'custom-checker-path') setCheckerBinaryPath(res as string);
-    else if (key === 'checker-type') setCheckerType(res as CheckerTypeType);
+    else if (key === 'multi-case-checker-type')
+      setCheckerType(res as MultiCaseCheckerTypeType);
+    else if (key === 'custom-invocation-checker-type')
+      setCheckerType(res as CustomInvocationCheckerTypeType);
     else if (key === 'epsilon') setEpsilon(res as number);
   };
 
@@ -43,7 +63,6 @@ const CheckerTypeSelectorRow = () => {
     );
     removers.push(eventHandler.on(CHANNELS.FOUND_IN_STORE, foundInStore));
 
-    eventHandler.requestFromStore('checker-type');
     eventHandler.requestFromStore('custom-checker-path');
     eventHandler.requestFromStore('epsilon');
 
@@ -52,9 +71,24 @@ const CheckerTypeSelectorRow = () => {
     };
   }, []);
 
+  // Every time we toggle custom invocation, ask for our store value again
+  useEffect(() => {
+    if (isCustomInvocation)
+      eventHandler.requestFromStore('custom-invocation-checker-type');
+    else eventHandler.requestFromStore('multi-case-checker-type');
+  }, [isCustomInvocation]);
+
   const onChangeCheckerType = (newCheckerType: CheckerTypeType) => {
     setCheckerType(newCheckerType);
-    eventHandler.setCheckerType(newCheckerType);
+
+    if (isCustomInvocation)
+      eventHandler.setCustomInvocationCheckerType(
+        newCheckerType as CustomInvocationCheckerTypeType
+      );
+    else
+      eventHandler.setMultiCaseCheckerType(
+        newCheckerType as MultiCaseCheckerTypeType
+      );
   };
 
   const onChangeEpsilon = (newEpsilon: number) => {
@@ -94,7 +128,11 @@ const CheckerTypeSelectorRow = () => {
       <DropdownSelectorRow
         label="Checker"
         value={checkerType}
-        choices={CHECKER_TYPE_OPTIONS}
+        choices={
+          isCustomInvocation
+            ? CUSTOM_INVOCATION_CHECKER_TYPE_OPTIONS
+            : MULTI_CASE_CHECKER_TYPE_OPTIONS
+        }
         onSelect={(value: string) =>
           onChangeCheckerType(value as CheckerTypeType)
         }

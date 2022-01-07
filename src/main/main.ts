@@ -22,9 +22,12 @@ import {
   judge,
   setTimeLimit,
   openCaseInfo,
-  setCheckerType,
+  setMultiCaseCheckerType,
+  setCustomInvocationCheckerType,
   setEpsilon,
   requestFromStore,
+  setIsCustomInvocation,
+  setCustomInvocationInput,
 } from './runner/judge';
 import { clearCache, touchCache } from './utils';
 import { checkDeps, installDep } from './depHandler';
@@ -44,8 +47,14 @@ ipcMain.on(CHANNELS.REQUEST_FROM_STORE, requestFromStore);
 ipcMain.on(CHANNELS.CHECK_DEPS, checkDeps);
 ipcMain.on(CHANNELS.SELECT_FILE, selectFile);
 ipcMain.on(CHANNELS.SET_TIME_LIMIT, setTimeLimit);
-ipcMain.on(CHANNELS.SET_CHECKER_TYPE, setCheckerType);
+ipcMain.on(CHANNELS.SET_MULTI_CASE_CHECKER_TYPE, setMultiCaseCheckerType);
+ipcMain.on(
+  CHANNELS.SET_CUSTOM_INVOCATION_CHECKER_TYPE,
+  setCustomInvocationCheckerType
+);
 ipcMain.on(CHANNELS.SET_EPSILON, setEpsilon);
+ipcMain.on(CHANNELS.SET_IS_CUSTOM_INVOCATION, setIsCustomInvocation);
+ipcMain.on(CHANNELS.SET_CUSTOM_INVOCATION_INPUT, setCustomInvocationInput);
 ipcMain.on(CHANNELS.JUDGE, judge);
 ipcMain.on(CHANNELS.OPEN_CASE_INFO, openCaseInfo);
 ipcMain.on(CHANNELS.INSTALL_DEP, installDep);

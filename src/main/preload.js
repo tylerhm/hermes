@@ -19,17 +19,37 @@ contextBridge.exposeInMainWorld('electron', {
     setTimeLimit(limit) {
       ipcRenderer.send(CHANNELS.SET_TIME_LIMIT, limit);
     },
-    setCheckerType(checkerType) {
-      ipcRenderer.send(CHANNELS.SET_CHECKER_TYPE, checkerType);
+    setMultiCaseCheckerType(checkerType) {
+      ipcRenderer.send(CHANNELS.SET_MULTI_CASE_CHECKER_TYPE, checkerType);
+    },
+    setCustomInvocationCheckerType(checkerType) {
+      ipcRenderer.send(
+        CHANNELS.SET_CUSTOM_INVOCATION_CHECKER_TYPE,
+        checkerType
+      );
     },
     setEpsilon(epsilon) {
       ipcRenderer.send(CHANNELS.SET_EPSILON, epsilon);
     },
+    setIsCustomInvocation(isCustomInvocation) {
+      ipcRenderer.send(CHANNELS.SET_IS_CUSTOM_INVOCATION, isCustomInvocation);
+    },
+    setCustomInvocationInput(customInvocationInput) {
+      ipcRenderer.send(
+        CHANNELS.SET_CUSTOM_INVOCATION_INPUT,
+        customInvocationInput
+      );
+    },
     judge() {
       ipcRenderer.send(CHANNELS.JUDGE);
     },
-    openCaseInfo(caseID, infoType) {
-      ipcRenderer.send(CHANNELS.OPEN_CASE_INFO, caseID, infoType);
+    openCaseInfo(caseID, infoType, isCustomInvocation) {
+      ipcRenderer.send(
+        CHANNELS.OPEN_CASE_INFO,
+        caseID,
+        infoType,
+        isCustomInvocation
+      );
     },
     on(channel, func) {
       // Deliberately strip event as it includes `sender`
