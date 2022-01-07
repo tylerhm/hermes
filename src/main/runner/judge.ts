@@ -227,7 +227,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   const data = store.get(STORE_KEYS.DATA, null) as string | null;
   const timeLimit = store.get(STORE_KEYS.TIME_LIMIT, 1) as number;
   const checkerType = store.get(
-    STORE_KEYS.CHECKER_TYPE,
+    STORE_KEYS.MULTI_CASE_CHECKER_TYPE,
     'diff'
   ) as MultiCaseCheckerTypeType;
   const epsilon = store.get(STORE_KEYS.EPSILON, 0.0000001) as number;

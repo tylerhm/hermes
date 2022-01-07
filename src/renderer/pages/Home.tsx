@@ -111,7 +111,7 @@ export default function Home() {
         />
         <CheckerTypeSelectorRow isCustomInvocation={isCustomInvocation} />
         <ToggleRow
-          label="Custom Invocation?"
+          label="Custom Invocation"
           checked={isCustomInvocation}
           onChange={onChangeIsCustomInvocation}
         />
