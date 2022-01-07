@@ -12,7 +12,9 @@ const CHANNELS = {
 
   SET_TIME_LIMIT: 'renderer-set-time-limit',
 
-  SET_CHECKER_TYPE: 'renderer-set-checker-type',
+  SET_MULTI_CASE_CHECKER_TYPE: 'renderer-set-multi-case-checker-type',
+  SET_CUSTOM_INVOCATION_CHECKER_TYPE:
+    'renderer-set-custom-invocation-checker-type',
   SET_EPSILON: 'renderer-set-epsilon',
 
   SET_IS_CUSTOM_INVOCATION: 'renderer-set-is-custom-invocation',

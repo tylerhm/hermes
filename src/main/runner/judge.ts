@@ -2,7 +2,7 @@
 import { dialog, shell } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
-import { existsSync } from 'fs';
+import { existsSync, readFile } from 'fs';
 import { maybeWslifyPath, spawnCommand } from '../osSpecific';
 import {
   getFileNameFromPath,
@@ -23,7 +23,8 @@ type StoreKeyType =
   | 'source'
   | 'data'
   | 'time-limit'
-  | 'checker-type'
+  | 'multi-case-checker-type'
+  | 'custom-invocation-checker-type'
   | 'epsilon'
   | 'custom-checker-path'
   | 'is-custom-invocation'
@@ -32,7 +33,8 @@ const STORE_KEYS: { [key: string]: StoreKeyType } = {
   SOURCE: 'source',
   DATA: 'data',
   TIME_LIMIT: 'time-limit',
-  CHECKER_TYPE: 'checker-type',
+  MULTI_CASE_CHECKER_TYPE: 'multi-case-checker-type',
+  CUSTOM_INVOCATION_CHECKER_TYPE: 'custom-invocation-checker-type',
   EPSILON: 'epsilon',
   CUSTOM_CHECKER_PATH: 'custom-checker-path',
   IS_CUSTOM_INVOCATION: 'is-custom-invocation',
@@ -99,13 +101,22 @@ export const setTimeLimit = async (
   store.set(STORE_KEYS.TIME_LIMIT, limit);
 };
 
-// Set the checker in the store
-type CheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
-export const setCheckerType = async (
+// Set the multi case checker in the store
+type MultiCaseCheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
+export const setMultiCaseCheckerType = async (
   _event: Electron.IpcMainEvent,
-  checkerType: CheckerTypeType
+  checkerType: MultiCaseCheckerTypeType
 ) => {
-  store.set(STORE_KEYS.CHECKER_TYPE, checkerType);
+  store.set(STORE_KEYS.MULTI_CASE_CHECKER_TYPE, checkerType);
+};
+
+// Set the custom invocation checker in the store
+type CustomInvocationCheckerTypeType = 'none' | 'custom';
+export const setCustomInvocationCheckerType = async (
+  _event: Electron.IpcMainEvent,
+  checkerType: CustomInvocationCheckerTypeType
+) => {
+  store.set(STORE_KEYS.CUSTOM_INVOCATION_CHECKER_TYPE, checkerType);
 };
 
 // Set the epsilon in the store
@@ -136,57 +147,89 @@ export const setCustomInvocationInput = async (
 type InfoType = 'input' | 'output' | 'userOutput';
 export const openCaseInfo = async (
   _event: Electron.IpcMainEvent,
-  caseID: string,
-  infoType: InfoType
+  identifier: string,
+  infoType: InfoType,
+  isCustomInvocation: boolean
 ) => {
-  const dataLocation: string = store.get(
-    getDataLocationStoreKey(caseID)
-  ) as string;
   // Get a path to what we are trying to open
   let absPath = '';
-  switch (infoType) {
-    case 'input':
-      absPath = path.join(dataLocation, `${caseID}.in`);
-      break;
-    case 'output':
-      absPath = path.join(dataLocation, `${caseID}.out`);
-      break;
-    case 'userOutput':
-      absPath = path.join(getCachePath(), `${caseID}.userOut`);
-      break;
-    default:
-      console.error(`Invalid infoType requested: ${infoType}`);
-      break;
+
+  // Custom invocation is stored in cache, and doesn't need judge output
+  if (isCustomInvocation) {
+    switch (infoType) {
+      case 'input':
+        absPath = getCachePath(`${identifier}-customInvocation.in`);
+        break;
+      case 'userOutput':
+        absPath = getCachePath(`${identifier}-customInvocation.userOut`);
+        break;
+      default:
+        console.error(`Invalid infoType requested: ${infoType}`);
+        break;
+    }
+  }
+  // Multi case can be anything
+  else {
+    const dataLocation: string = store.get(
+      getDataLocationStoreKey(identifier)
+    ) as string;
+    switch (infoType) {
+      case 'input':
+        absPath = path.join(dataLocation, `${identifier}.in`);
+        break;
+      case 'output':
+        absPath = path.join(dataLocation, `${identifier}.out`);
+        break;
+      case 'userOutput':
+        absPath = path.join(getCachePath(), `${identifier}.userOut`);
+        break;
+      default:
+        console.error(`Invalid infoType requested: ${infoType}`);
+        break;
+    }
   }
 
   shell.openPath(absPath);
 };
 
 // ALl valid verdicts, and responses
-type VerdictType = 'AC' | 'PE' | 'WA' | 'TLE' | 'RTE' | 'INTERNAL_ERROR';
+type VerdictType =
+  | 'AC'
+  | 'PE'
+  | 'WA'
+  | 'TLE'
+  | 'RTE'
+  | 'INTERNAL_ERROR'
+  | 'NONE';
 type ResponseType = {
   verdict: VerdictType;
   messages: Array<string>;
 };
-type ResultsType = {
-  [inputId: string]: ResponseType;
+type MultiCaseResultsType = {
+  [id: string]: ResponseType;
 };
 
-// Main judge function
-export const judge = async (event: Electron.IpcMainEvent) => {
+type CustomInvocationResultType = {
+  id: string;
+  stdout: string;
+  response: ResponseType | null;
+};
+
+type ResultsType = MultiCaseResultsType | CustomInvocationResultType;
+
+const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
+  event.reply(CHANNELS.BEGIN_EVALUATION, 'multi');
+
   /*
    * PREP
    */
-  event.reply(CHANNELS.BEGIN_EVALUATION);
-
-  // Get all data from store
   const source = store.get(STORE_KEYS.SOURCE, null) as string | null;
   const data = store.get(STORE_KEYS.DATA, null) as string | null;
   const timeLimit = store.get(STORE_KEYS.TIME_LIMIT, 1) as number;
   const checkerType = store.get(
     STORE_KEYS.CHECKER_TYPE,
     'diff'
-  ) as CheckerTypeType;
+  ) as MultiCaseCheckerTypeType;
   const epsilon = store.get(STORE_KEYS.EPSILON, 0.0000001) as number;
   const customCheckerPath = store.get(
     STORE_KEYS.CUSTOM_CHECKER_PATH,
@@ -360,4 +403,145 @@ export const judge = async (event: Electron.IpcMainEvent) => {
     numJudged += 1;
     if (numJudged === inputs.length) event.reply(CHANNELS.DONE_JUDGING);
   });
+};
+
+const judgeCustomInvocation = async (event: Electron.IpcMainEvent) => {
+  event.reply(CHANNELS.BEGIN_EVALUATION, 'custom');
+
+  /*
+   * PREP
+   */
+  const source = store.get(STORE_KEYS.SOURCE, null) as string | null;
+  const input = store.get(STORE_KEYS.CUSTOM_INVOCATION_INPUT, '') as string;
+  const timeLimit = store.get(STORE_KEYS.TIME_LIMIT, 1) as number;
+  const checkerType = store.get(
+    STORE_KEYS.CUSTOM_INVOCATION_CHECKER_TYPE,
+    'none'
+  ) as CustomInvocationCheckerTypeType;
+  const epsilon = store.get(STORE_KEYS.EPSILON, 0.0000001) as number;
+  const customCheckerPath = store.get(
+    STORE_KEYS.CUSTOM_CHECKER_PATH,
+    'NA'
+  ) as string;
+
+  // If we are missing critical info, then halt
+  if (
+    source == null ||
+    (checkerType === 'custom' && customCheckerPath === 'NA')
+  ) {
+    event.reply(CHANNELS.MISSING_INFO);
+    return;
+  }
+
+  // If source does not exist, halt
+  if (!existsSync(source)) {
+    event.reply(CHANNELS.FILE_NOT_EXIST, source);
+    return;
+  }
+
+  // Process source information
+  // Process the source information
+  const ext = getExtension(source);
+  const lang = getLang(ext);
+
+  // If the language is not supported, halt
+  if (lang == null) {
+    event.reply(CHANNELS.UNSUPPORTED_LANGUAGE, ext);
+    return;
+  }
+
+  /*
+   * COMPILATION
+   */
+  event.reply(CHANNELS.BEGIN_COMPILING);
+
+  // Compile the code
+  let compiledPath: string;
+  try {
+    compiledPath = await compile(source, lang);
+  } catch (err) {
+    console.error(err);
+    event.reply(CHANNELS.COMPILATION_ERROR);
+    return;
+  }
+
+  event.reply(CHANNELS.DONE_COMPILING);
+
+  /*
+   * JUDGING
+   */
+  event.reply(CHANNELS.BEGIN_JUDGING);
+
+  // Normalize all paths Windows -> WSL bridge users
+  const normalizedFastCustomInvocationBinary = await maybeWslifyPath(
+    path.join(__dirname, '../../binaries/fastCustomInvocation')
+  );
+  const normalizedCachePath = await maybeWslifyPath(getCachePath());
+  const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
+  const normalizedRunguardPath = await maybeWslifyPath(
+    path.join(__dirname, '../../binaries/runguard')
+  );
+  const normalizedCustomCheckerPath =
+    customCheckerPath === 'NA'
+      ? customCheckerPath
+      : await maybeWslifyPath(customCheckerPath);
+
+  const judger = spawnCommand(normalizedFastCustomInvocationBinary, [
+    normalizedCachePath,
+    getFileNameFromPath(compiledPath),
+    normalizedBinaryPath,
+    lang,
+    input,
+    timeLimit.toString(),
+    '/',
+    normalizedRunguardPath,
+    checkerType,
+    epsilon.toString(),
+    normalizedCustomCheckerPath,
+  ]);
+
+  type MessageType = {
+    id: string;
+    stdoutPath: string;
+    verdict: VerdictType;
+    messages: Array<string>;
+  };
+
+  judger.stdout.on('data', async (msg) => {
+    console.log(msg.toString());
+    if (msg.toString()[0] !== '{') return;
+    const result: MessageType = JSON.parse(msg.toString());
+
+    const stdout: string = await new Promise((resolve) => {
+      readFile(result.stdoutPath, (error, buffer) => {
+        if (error) resolve(error.message);
+        else resolve(buffer.toString());
+      });
+    });
+
+    const response: CustomInvocationResultType = {
+      id: result.id,
+      stdout,
+      response:
+        result.verdict === 'NONE'
+          ? null
+          : {
+              verdict: result.verdict,
+              messages: result.messages,
+            },
+    };
+    event.reply(CHANNELS.CUSTOM_INVOCATION_DONE, response);
+    event.reply(CHANNELS.DONE_JUDGING);
+  });
+};
+
+// Main judge function
+export const judge = async (event: Electron.IpcMainEvent) => {
+  const isCustomInvocation = store.get(
+    STORE_KEYS.IS_CUSTOM_INVOCATION,
+    false
+  ) as boolean;
+
+  if (isCustomInvocation) judgeCustomInvocation(event);
+  else judgeMultiCase(event);
 };

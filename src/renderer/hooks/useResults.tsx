@@ -8,15 +8,23 @@ export type MultiCaseResultsType = {
 };
 
 export type CustomInvocationResultType = {
+  id: string;
   stdout: string;
   response: ResponseType | null;
 };
 
-type ResultsType = MultiCaseResultsType | CustomInvocationResultType;
+type ResultsTypeType = 'multi' | 'custom' | null;
+type ResultsType = {
+  type: ResultsTypeType;
+  results: MultiCaseResultsType | CustomInvocationResultType;
+};
 
 // Hook to listen to current results status
 const useResults = () => {
-  const [results, setResults] = useState<ResultsType>({});
+  const [results, setResults] = useState<ResultsType>({
+    type: null,
+    results: {},
+  });
   const [judging, setJudging] = useState<boolean>(false);
 
   // Listen to updates in results, and set necessary data.
@@ -25,14 +33,18 @@ const useResults = () => {
       setJudging(true);
     };
 
-    const resetResults = () => {
-      setResults({});
+    const prepResults = (type: ResultsTypeType) => {
+      setResults({
+        type,
+        results: {},
+      });
       setJudging(false);
     };
 
-    const dataRecieved = (dataIds: Array<string>) => {
-      setResults(
-        dataIds.reduce((curRes, id) => {
+    const dataProcessed = (dataIds: Array<string>) => {
+      setResults({
+        type: 'multi',
+        results: dataIds.reduce((curRes, id) => {
           return {
             ...curRes,
             [id]: {
@@ -40,26 +52,32 @@ const useResults = () => {
               messages: [],
             },
           };
-        }, {})
-      );
+        }, {}),
+      });
     };
 
     const caseJudged = (newResults: MultiCaseResultsType) => {
-      setResults(newResults);
+      setResults({
+        type: 'multi',
+        results: newResults,
+      });
     };
 
     const customInvocationDone = (result: CustomInvocationResultType) => {
-      setResults(result);
+      setResults({
+        type: 'custom',
+        results: result,
+      });
     };
 
     const removers: Array<() => void> = [];
 
     // Used by all judge methods
+    removers.push(eventHandler.on(CHANNELS.BEGIN_EVALUATION, prepResults));
     removers.push(eventHandler.on(CHANNELS.BEGIN_JUDGING, startJudging));
-    removers.push(eventHandler.on(CHANNELS.BEGIN_EVALUATION, resetResults));
 
     // Used by multi test case judging
-    removers.push(eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataRecieved));
+    removers.push(eventHandler.on(CHANNELS.DONE_COLLECT_DATA, dataProcessed));
     removers.push(eventHandler.on(CHANNELS.CASE_JUDGED, caseJudged));
 
     // Used by custom invocation judging

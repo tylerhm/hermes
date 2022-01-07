@@ -13,14 +13,20 @@ type Props = {
 const Results = ({ isCustomInvocation }: Props) => {
   const { results, judging } = useResults();
 
-  return isCustomInvocation ? (
-    <CustomInvocationResults
-      results={results as CustomInvocationResultType}
-      judging={judging}
-    />
-  ) : (
-    <MultiCaseResults results={results as MultiCaseResultsType} />
-  );
+  if (isCustomInvocation && results.type === 'custom')
+    return (
+      <CustomInvocationResults
+        results={results.results as CustomInvocationResultType}
+        judging={judging}
+      />
+    );
+
+  if (!isCustomInvocation && results.type === 'multi')
+    return (
+      <MultiCaseResults results={results.results as MultiCaseResultsType} />
+    );
+
+  return null;
 };
 
 export default Results;

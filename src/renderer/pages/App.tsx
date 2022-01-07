@@ -3,10 +3,11 @@ import DependencyCheck from './DependencyCheck';
 import Home from './Home';
 import './App.css';
 import {
-  CheckerTypeType,
+  CustomInvocationCheckerTypeType,
   DepType,
   InfoType,
   InstallType,
+  MultiCaseCheckerTypeType,
   StoreKeyType,
 } from '../utils/types';
 
@@ -26,12 +27,21 @@ declare global {
         ) => void;
         setFile: (key: string, isDirectory: boolean) => void;
         setTimeLimit: (limit: number) => void;
-        setCheckerType: (checkerType: CheckerTypeType) => void;
+        setMultiCaseCheckerType: (
+          checkerType: MultiCaseCheckerTypeType
+        ) => void;
+        setCustomInvocationCheckerType: (
+          checkerType: CustomInvocationCheckerTypeType
+        ) => void;
         setEpsilon: (epsilon: number) => void;
         setIsCustomInvocation: (isCustomInvocation: boolean) => void;
         setCustomInvocationInput: (customInvocationInput: string) => void;
         judge: () => void;
-        openCaseInfo: (caseID: string, infoType: InfoType) => void;
+        openCaseInfo: (
+          caseID: string,
+          infoType: InfoType,
+          isCustomInvocation: boolean
+        ) => void;
       };
     };
   }

@@ -16,7 +16,6 @@ export default function Home() {
   const [dataFolder, setDataFolder] = useState<string>();
   const [timeLimit, setTimeLimit] = useState<number>(1);
   const [isCustomInvocation, setIsCustomInvocation] = useState<boolean>(false);
-  const [customInvocationInput, setCustomInvocationInput] = useState<string>();
 
   // This is ok because the setter is only called as a LISTENER
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -26,8 +25,12 @@ export default function Home() {
     else if (key === 'data') setDataFolder(res as string);
     else if (key === 'is-custom-invocation')
       setIsCustomInvocation(res as boolean);
-    else if (key === 'custom-invocation-input')
-      setCustomInvocationInput(res as string);
+    else if (key === 'custom-invocation-input') {
+      const customInvocationInputTextArea =
+        document.getElementById('Custom Input');
+      if (customInvocationInputTextArea)
+        customInvocationInputTextArea.innerHTML = res as string;
+    }
   };
 
   // Request store data, and listen on updates
@@ -87,7 +90,6 @@ export default function Home() {
           isCustomInvocation ? (
             <TextInputRow
               label="Custom Input"
-              defaultValue={customInvocationInput}
               onChange={onChangeCustomInvocationInput}
             />
           ) : (
@@ -107,7 +109,7 @@ export default function Home() {
           units="seconds"
           onChange={onChangeTimeLimit}
         />
-        {isCustomInvocation ? null : <CheckerTypeSelectorRow />}
+        <CheckerTypeSelectorRow isCustomInvocation={isCustomInvocation} />
         <ToggleRow
           label="Custom Invocation?"
           checked={isCustomInvocation}
