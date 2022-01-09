@@ -52,14 +52,14 @@ const RESULT_META: ResultsMetaType = {
 
 type PopoverProps = {
   identifier: string;
-  messages: Array<string>;
+  response: ResponseType;
   isCustomInvocation: boolean;
 };
 
 // Render the popover content of a result
 const PopoverContent = ({
   identifier,
-  messages,
+  response,
   isCustomInvocation,
 }: PopoverProps) => {
   const requestInfo = (infoType: InfoType) => {
@@ -73,9 +73,7 @@ const PopoverContent = ({
         rowGap: '0.2em',
       }}
     >
-      {messages.map((message) => (
-        <div key={`${identifier}-${message}`}>{message}</div>
-      ))}
+      {response.messages}
       <Button type="dashed" onClick={() => requestInfo('input')}>
         Input
       </Button>
@@ -112,7 +110,7 @@ const ResultButton = ({
       content={
         <PopoverContent
           identifier={identifier}
-          messages={response.messages}
+          response={response}
           isCustomInvocation={isCustomInvocation}
         />
       }
