@@ -18,6 +18,9 @@ import compile from './compile';
 // Store for the main thread
 const store = new Store();
 
+// Clear all previously stored case paths
+store.delete('casePaths');
+
 // All valid direct access store keys
 type StoreKeyType =
   | 'source'
@@ -42,8 +45,9 @@ const STORE_KEYS: { [key: string]: StoreKeyType } = {
 };
 
 // Returns store key for a given case
-const getDataLocationStoreKey = (caseID: string) => {
-  return `casePaths.${caseID}`;
+type InfoType = 'input' | 'output' | 'userOutput';
+const getDataLocationStoreKey = (identifier: string, caseType: InfoType) => {
+  return `casePaths.${caseType}.${identifier}`;
 };
 
 // Grab existing data from store if it exists
@@ -144,7 +148,6 @@ export const setCustomInvocationInput = async (
 };
 
 // Attempt to open the requested info about a case
-type InfoType = 'input' | 'output' | 'userOutput';
 export const openCaseInfo = async (
   _event: Electron.IpcMainEvent,
   identifier: string,
@@ -170,23 +173,9 @@ export const openCaseInfo = async (
   }
   // Multi case can be anything
   else {
-    const dataLocation: string = store.get(
-      getDataLocationStoreKey(identifier)
+    absPath = store.get(
+      getDataLocationStoreKey(identifier, infoType)
     ) as string;
-    switch (infoType) {
-      case 'input':
-        absPath = path.join(dataLocation, `${identifier}.in`);
-        break;
-      case 'output':
-        absPath = path.join(dataLocation, `${identifier}.out`);
-        break;
-      case 'userOutput':
-        absPath = path.join(getCachePath(), `${identifier}.userOut`);
-        break;
-      default:
-        console.error(`Invalid infoType requested: ${infoType}`);
-        break;
-    }
   }
 
   shell.openPath(absPath);
@@ -200,7 +189,8 @@ type VerdictType =
   | 'TLE'
   | 'RTE'
   | 'INTERNAL_ERROR'
-  | 'NONE';
+  | 'NONE'
+  | 'UNKNOWN';
 type ResponseType = {
   verdict: VerdictType;
   messages: Array<string>;
@@ -289,16 +279,26 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   event.reply(CHANNELS.BEGIN_COLLECT_DATA);
 
   // Get inputs and outputs from data dir
-  const inputs = (await findByExtension(data, 'in')).map((absPath) => {
-    return trimExtension(absPath);
-  });
-  const outputs = (await findByExtension(data, 'out')).map((absPath) => {
-    return trimExtension(absPath);
-  });
+  // Reduce inputs and outputs to identifiers, and store their paths in the store
+  const inputIdentifiers = (await findByExtension(data, 'in')).map(
+    (inputPath) => {
+      const identifier = getFileNameFromPath(trimExtension(inputPath));
+      store.set(getDataLocationStoreKey(identifier, 'input'), inputPath);
+      return identifier;
+    }
+  );
+
+  const outputIdentifiers = (await findByExtension(data, 'out')).map(
+    (outputPath) => {
+      const identifier = getFileNameFromPath(trimExtension(outputPath));
+      store.set(getDataLocationStoreKey(identifier, 'output'), outputPath);
+      return identifier;
+    }
+  );
 
   // Verify that every input has an output
-  const allCasesValid = inputs.every((absPath) => {
-    return outputs.includes(absPath);
+  const allCasesValid = inputIdentifiers.every((identifier) => {
+    return outputIdentifiers.includes(identifier);
   });
 
   if (!allCasesValid) {
@@ -306,14 +306,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
-  // Simultaneously map to ids and store their locations in store
-  const inputIds = inputs.map((absPath) => {
-    const caseID = getFileNameFromPath(absPath);
-    store.set(getDataLocationStoreKey(caseID), path.dirname(absPath));
-    return caseID;
-  });
-
-  event.reply(CHANNELS.DONE_COLLECT_DATA, inputIds);
+  event.reply(CHANNELS.DONE_COLLECT_DATA, inputIdentifiers);
 
   /*
    * JUDGING
@@ -321,15 +314,13 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   event.reply(CHANNELS.BEGIN_JUDGING);
 
   // Populate results map with unkown information
-  const results: ResultsType = inputs.reduce((curRes, absPath) => {
-    return {
-      ...curRes,
-      [getFileNameFromPath(absPath)]: {
-        verdict: 'UNKNOWN',
-        messages: [],
-      },
+  const results: ResultsType = {};
+  inputIdentifiers.forEach((identifier) => {
+    results[identifier] = {
+      verdict: 'UNKNOWN',
+      messages: [],
     };
-  }, {});
+  });
 
   // Normalize all paths Windows -> WSL bridge users
   const normalizedFastJudgeBinary = await maybeWslifyPath(
@@ -338,21 +329,28 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   const normalizedCachePath = await maybeWslifyPath(getCachePath());
   const normalizedBinaryPath = await maybeWslifyPath(compiledPath);
 
-  let normalizedInputPaths: Array<string>;
-  let normalizedOutputPaths: Array<string>;
-  // Only make the call if necessary, these strings are HUGE.
+  let normalizedInputPaths = inputIdentifiers.map(
+    (identifier) =>
+      store.get(getDataLocationStoreKey(identifier, 'input')) as string
+  );
+  let normalizedOutputPaths = outputIdentifiers.map(
+    (identifier) =>
+      store.get(getDataLocationStoreKey(identifier, 'output')) as string
+  );
+  // Only make the normalization call if necessary, these strings are HUGE.
   if (process.platform === 'win32') {
-    const normalizedInputPathPromises = inputs.map(async (idPath) => {
-      return maybeWslifyPath(`${idPath}.in`);
-    });
-    const normalizedOutputPathPromises = inputs.map(async (idPath) => {
-      return maybeWslifyPath(`${idPath}.out`);
-    });
+    const normalizedInputPathPromises = normalizedInputPaths.map(
+      async (inputPath) => {
+        return maybeWslifyPath(inputPath);
+      }
+    );
+    const normalizedOutputPathPromises = normalizedOutputPaths.map(
+      async (outputPath) => {
+        return maybeWslifyPath(outputPath);
+      }
+    );
     normalizedInputPaths = await Promise.all(normalizedInputPathPromises);
     normalizedOutputPaths = await Promise.all(normalizedOutputPathPromises);
-  } else {
-    normalizedInputPaths = inputs.map((idPath) => `${idPath}.in`);
-    normalizedOutputPaths = inputs.map((idPath) => `${idPath}.out`);
   }
 
   const normalizedRunguardPath = await maybeWslifyPath(
@@ -369,7 +367,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
     getFileNameFromPath(compiledPath),
     normalizedBinaryPath,
     lang,
-    inputIds.toString(),
+    inputIdentifiers.toString(),
     normalizedInputPaths.toString(),
     normalizedOutputPaths.toString(),
     timeLimit.toString(),
@@ -401,7 +399,8 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
     event.reply(CHANNELS.CASE_JUDGED, results);
 
     numJudged += 1;
-    if (numJudged === inputs.length) event.reply(CHANNELS.DONE_JUDGING);
+    if (numJudged === inputIdentifiers.length)
+      event.reply(CHANNELS.DONE_JUDGING);
   });
 };
 
