@@ -2,6 +2,12 @@
 
 ## Usage
 
+### Installation
+
+Grab and run the correct installer or binary for your system from our [releases](https://github.com/TylerMathis/hermes/releases/) page.
+
+### Notes
+
 Hermes makes frequent use of the shell for compilation and checking. In order for this to work, you _must_ have the following installed and in your PATH.
 
 - [python3](https://realpython.com/installing-python/)
