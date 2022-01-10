@@ -113,7 +113,7 @@ const CheckerTypeSelectorRow = ({ isCustomInvocation }: Props) => {
     if (checkerType === 'custom')
       return (
         <FileSelectionRow
-          label="Checker Binary"
+          label="Checker Executable"
           placeholder="Select file"
           value={checkerBinaryPath}
           onClick={() => eventHandler.setFile('custom-checker-path', false)}
