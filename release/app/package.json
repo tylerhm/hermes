@@ -1,6 +1,6 @@
 {
   "name": "hermes",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "UCF Programming Team offline judge. The quickest of all the gods.",
   "main": "./dist/main/main.js",
   "author": {
