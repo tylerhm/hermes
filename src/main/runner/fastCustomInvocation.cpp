@@ -65,7 +65,7 @@ int main(int argc, char **argv) {
     ofstream out(inputPath);
     out << input << "\n";
     out.close();
-    string userOutputPath = cachePath + directoryPathSeparator + binaryName + "-customInvocation.userOut";
+    string userOutputPath = cachePath + directoryPathSeparator + binaryName + "-customInvocation.user.out";
 
     // Run the case with provided runs script
     // Pipe stderr to stdout so that we can monitor for TLE or RTE

@@ -1,9 +1,14 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
-import { dialog, shell } from 'electron';
+import { dialog } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import { existsSync, readFile } from 'fs';
-import { maybeWslifyPath, spawnCommand } from '../osSpecific';
+import {
+  executeCommand,
+  maybeWslifyPath,
+  platformSpecific,
+  spawnCommand,
+} from '../osSpecific';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -164,7 +169,7 @@ export const openCaseInfo = async (
         absPath = getCachePath(`${identifier}-customInvocation.in`);
         break;
       case 'userOutput':
-        absPath = getCachePath(`${identifier}-customInvocation.userOut`);
+        absPath = getCachePath(`${identifier}-customInvocation.user.out`);
         break;
       default:
         console.error(`Invalid infoType requested: ${infoType}`);
@@ -178,7 +183,13 @@ export const openCaseInfo = async (
     ) as string;
   }
 
-  shell.openPath(absPath);
+  // Do not call shell.openPath, it is broken on PTL
+  executeCommand(
+    platformSpecific({
+      linux: `xdg-open ${absPath}`,
+      mac: `open ${absPath}`,
+    }) as string
+  );
 };
 
 // ALl valid verdicts, and responses
@@ -291,7 +302,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   const outputIdentifiers = (await findByExtension(data, 'out')).map(
     (outputPath) => {
       const identifier = getFileNameFromPath(trimExtension(outputPath));
-      const userOutPath = path.join(getCachePath(), `${identifier}.userOut`);
+      const userOutPath = path.join(getCachePath(), `${identifier}.user.out`);
       store.set(getDataLocationStoreKey(identifier, 'output'), outputPath);
       store.set(getDataLocationStoreKey(identifier, 'userOutput'), userOutPath);
       return identifier;

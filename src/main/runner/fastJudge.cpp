@@ -86,7 +86,7 @@ int main(int argc, char **argv) {
         string inputID = inputIDs[testCase];
         string inputPath = inputPaths[testCase];
         string outputPath = outputPaths[testCase];
-        string userOutputPath = cachePath + directoryPathSeparator + inputID + ".userOut";
+        string userOutputPath = cachePath + directoryPathSeparator + inputID + ".user.out";
 
         // Run the case with provided runs script
         // Pipe stderr to stdout so that we can monitor for TLE or RTE
