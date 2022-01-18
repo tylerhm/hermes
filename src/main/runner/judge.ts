@@ -291,7 +291,9 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   const outputIdentifiers = (await findByExtension(data, 'out')).map(
     (outputPath) => {
       const identifier = getFileNameFromPath(trimExtension(outputPath));
+      const userOutPath = path.join(getCachePath(), `${identifier}.userOut`);
       store.set(getDataLocationStoreKey(identifier, 'output'), outputPath);
+      store.set(getDataLocationStoreKey(identifier, 'userOutput'), userOutPath);
       return identifier;
     }
   );
