@@ -35,3 +35,13 @@ export const maybeWslifyPath = async (absPath: string) => {
     });
   });
 };
+
+// Return an option based on what operating system class we are on
+export type PlatformType = 'linux' | 'mac';
+export type PlatformOptionsType = {
+  [P in PlatformType]: unknown;
+};
+export const platformSpecific = (options: PlatformOptionsType) => {
+  if (process.platform === 'darwin') return options.mac;
+  return options.linux;
+};

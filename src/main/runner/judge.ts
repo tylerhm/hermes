@@ -1,9 +1,14 @@
 /* eslint no-await-in-loop: off, global-require: off, no-console: off, promise/always-return: off */
-import { dialog, shell } from 'electron';
+import { dialog } from 'electron';
 import Store from 'electron-store';
 import path from 'path';
 import { existsSync, readFile } from 'fs';
-import { maybeWslifyPath, spawnCommand } from '../osSpecific';
+import {
+  executeCommand,
+  maybeWslifyPath,
+  platformSpecific,
+  spawnCommand,
+} from '../osSpecific';
 import {
   getFileNameFromPath,
   findByExtension,
@@ -178,7 +183,13 @@ export const openCaseInfo = async (
     ) as string;
   }
 
-  shell.openPath(absPath);
+  // Do not call shell.openPath, it is broken on PTL
+  executeCommand(
+    platformSpecific({
+      linux: `xdg-open ${absPath}`,
+      mac: `open ${absPath}`,
+    }) as string
+  );
 };
 
 // ALl valid verdicts, and responses
