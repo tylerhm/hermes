@@ -169,7 +169,7 @@ export const openCaseInfo = async (
         absPath = getCachePath(`${identifier}-customInvocation.in`);
         break;
       case 'userOutput':
-        absPath = getCachePath(`${identifier}-customInvocation.userOut`);
+        absPath = getCachePath(`${identifier}-customInvocation.user.out`);
         break;
       default:
         console.error(`Invalid infoType requested: ${infoType}`);
@@ -302,7 +302,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   const outputIdentifiers = (await findByExtension(data, 'out')).map(
     (outputPath) => {
       const identifier = getFileNameFromPath(trimExtension(outputPath));
-      const userOutPath = path.join(getCachePath(), `${identifier}.userOut`);
+      const userOutPath = path.join(getCachePath(), `${identifier}.user.out`);
       store.set(getDataLocationStoreKey(identifier, 'output'), outputPath);
       store.set(getDataLocationStoreKey(identifier, 'userOutput'), userOutPath);
       return identifier;
