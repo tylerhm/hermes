@@ -42,11 +42,18 @@ Install `node_modules`:
 npm install
 ```
 
+Build binaries:
+`make`
+
 Start the app in the `dev` environment:
 
 ```bash
 npm start
 ```
+
+## Debugging Checklist
+
+1. Our C++ scripts might have changed since you last built, have you run `make`?
 
 ### Adding Language Support
 
