@@ -19,7 +19,7 @@ const compile = async (sourcePath: string, lang: LangType) => {
   const normalizedCachePath = await maybeWslifyPath(getCachePath());
 
   const command = langSpecific(lang, {
-    cpp: `g++ ${normalizedSourcePath} -O2 -o ${normalizedCacheBinaryPath}`,
+    cpp: `g++ ${normalizedSourcePath} -O2 -std=c++17 -o ${normalizedCacheBinaryPath}`,
     c: `gcc ${normalizedSourcePath} -O2 -o ${normalizedCacheBinaryPath}`,
     java: `javac ${normalizedSourcePath} -d ${normalizedCachePath}`,
     py: `cp ${normalizedSourcePath} ${normalizedCachePath}`,
