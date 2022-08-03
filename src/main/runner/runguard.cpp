@@ -45,6 +45,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    system(command.c_str());
-    return 0;
+    int status = system(command.c_str());
+    int returnCode = WEXITSTATUS(status);
+    return returnCode;
 }

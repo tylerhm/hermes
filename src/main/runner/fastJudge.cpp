@@ -17,6 +17,9 @@ enum STATUS_CODES {
 
     TLE = 3,
     RTE = 4,
+
+    // Special for Fedora
+    FED_TLE = 152,
 };
 
 const int BUF_SIZE = 256;
@@ -111,7 +114,7 @@ int main(int argc, char **argv) {
             for (int i = 0; buf[i] != '\0'; i++) {
                 if (buf[i] != '\n' && buf[i] != '\b') {
                     if (buf[i] != ' ')
-                      stdErrSanitized += tolower(buf[i]);
+                        stdErrSanitized += tolower(buf[i]);
                     runStderr += buf[i];
                 }
             }
@@ -122,12 +125,19 @@ int main(int argc, char **argv) {
         }
 
         // Close stream
-        pclose(runOutput);
+        int runExitStatus = pclose(runOutput);
+        int runReturnCode = WEXITSTATUS(runExitStatus);
+
+        if (runStatus == AC && runReturnCode != AC) {
+            if (runReturnCode == FED_TLE)
+                runStatus = TLE;
+            else runStatus = RTE;
+        }
 
         string verdict = "";
         vector<string> messages;
         // RTE or TLE
-        if (runStatus != 0) {
+        if (runStatus != AC) {
             switch (runStatus) {
                 case TLE:
                     verdict = "TLE";
@@ -169,7 +179,7 @@ int main(int argc, char **argv) {
                 for (int i = 0; buf[i] != '\0'; i++) {
                     if (buf[i] == '\n') {
                         if (curMessage != "")
-                          messages.push_back(curMessage);
+                            messages.push_back(curMessage);
                         curMessage = "";
                     } else curMessage += buf[i];
                 }

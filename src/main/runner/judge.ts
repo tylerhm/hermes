@@ -326,7 +326,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
    */
   event.reply(CHANNELS.BEGIN_JUDGING);
 
-  // Populate results map with unkown information
+  // Populate results map with unknown verdicts
   const results: ResultsType = {};
   inputIdentifiers.forEach((identifier) => {
     results[identifier] = {
