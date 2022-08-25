@@ -13,6 +13,7 @@ export type ResponseType = {
 export type InfoType = 'input' | 'output' | 'userOutput';
 export type MultiCaseCheckerTypeType = 'diff' | 'token' | 'epsilon' | 'custom';
 export type CustomInvocationCheckerTypeType = 'none' | 'custom';
+export type CppStandardType = 11 | 14 | 17 | 20;
 export type DepType = 'Python 3' | 'Apollo' | 'xdg-open-wsl' | 'wsl';
 export type InstallType = 'pip';
 export type StoreKeyType =
@@ -24,4 +25,5 @@ export type StoreKeyType =
   | 'epsilon'
   | 'custom-checker-path'
   | 'is-custom-invocation'
-  | 'custom-invocation-input';
+  | 'custom-invocation-input'
+  | 'cpp-standard';

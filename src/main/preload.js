@@ -40,6 +40,9 @@ contextBridge.exposeInMainWorld('electron', {
         customInvocationInput
       );
     },
+    setCppStandard(cppStandard) {
+      ipcRenderer.send(CHANNELS.SET_CPP_STANDARD, cppStandard);
+    },
     judge() {
       ipcRenderer.send(CHANNELS.JUDGE);
     },

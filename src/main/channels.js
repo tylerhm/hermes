@@ -20,6 +20,8 @@ const CHANNELS = {
   SET_IS_CUSTOM_INVOCATION: 'renderer-set-is-custom-invocation',
   SET_CUSTOM_INVOCATION_INPUT: 'renderer-set-custom-invocation-input',
 
+  SET_CPP_STANDARD: 'renderer-set-cpp-standard',
+
   JUDGE: 'renderer-judge',
   OPEN_CASE_INFO: 'renderer-request-open-case-info',
 

@@ -28,6 +28,7 @@ import {
   requestFromStore,
   setIsCustomInvocation,
   setCustomInvocationInput,
+  setCppStandard,
 } from './runner/judge';
 import { clearCache, touchCache } from './utils';
 import { checkDeps, installDep } from './depHandler';
@@ -55,6 +56,7 @@ ipcMain.on(
 ipcMain.on(CHANNELS.SET_EPSILON, setEpsilon);
 ipcMain.on(CHANNELS.SET_IS_CUSTOM_INVOCATION, setIsCustomInvocation);
 ipcMain.on(CHANNELS.SET_CUSTOM_INVOCATION_INPUT, setCustomInvocationInput);
+ipcMain.on(CHANNELS.SET_CPP_STANDARD, setCppStandard);
 ipcMain.on(CHANNELS.JUDGE, judge);
 ipcMain.on(CHANNELS.OPEN_CASE_INFO, openCaseInfo);
 ipcMain.on(CHANNELS.INSTALL_DEP, installDep);

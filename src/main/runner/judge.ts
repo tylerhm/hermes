@@ -16,6 +16,7 @@ import {
   getLang,
   trimExtension,
   getCachePath,
+  CppStandardType,
 } from '../utils';
 import CHANNELS from '../channels';
 import compile from './compile';
@@ -36,7 +37,8 @@ type StoreKeyType =
   | 'epsilon'
   | 'custom-checker-path'
   | 'is-custom-invocation'
-  | 'custom-invocation-input';
+  | 'custom-invocation-input'
+  | 'cpp-standard';
 const STORE_KEYS: { [key: string]: StoreKeyType } = {
   SOURCE: 'source',
   DATA: 'data',
@@ -47,6 +49,7 @@ const STORE_KEYS: { [key: string]: StoreKeyType } = {
   CUSTOM_CHECKER_PATH: 'custom-checker-path',
   IS_CUSTOM_INVOCATION: 'is-custom-invocation',
   CUSTOM_INVOCATION_INPUT: 'custom-invocation-input',
+  CPP_STANDARD: 'cpp-standard',
 };
 
 // Returns store key for a given case
@@ -150,6 +153,14 @@ export const setCustomInvocationInput = async (
   customInvocationInput: string
 ) => {
   store.set(STORE_KEYS.CUSTOM_INVOCATION_INPUT, customInvocationInput);
+};
+
+// Set the compiler version in the store
+export const setCppStandard = async (
+  _event: Electron.IpcMainEvent,
+  cppStandard: CppStandardType
+) => {
+  store.set(STORE_KEYS.CPP_STANDARD, cppStandard);
 };
 
 // Attempt to open the requested info about a case
@@ -267,6 +278,8 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
+  const cppStandard = store.get(STORE_KEYS.CPP_STANDARD, 17) as number;
+
   /*
    * COMPILATION
    */
@@ -275,7 +288,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
   // Compile the code
   let compiledPath: string;
   try {
-    compiledPath = await compile(source, lang);
+    compiledPath = await compile(source, lang, cppStandard);
   } catch (err) {
     console.error(err);
     event.reply(CHANNELS.COMPILATION_ERROR);

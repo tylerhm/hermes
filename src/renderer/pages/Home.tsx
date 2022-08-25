@@ -10,6 +10,7 @@ import NumberSelectionRow from '../components/NumberSelectionRow';
 import JudgeButton from '../components/JudgeButton';
 import Results from '../components/results/Results';
 import CheckerTypeSelectorRow from '../components/CheckerTypeSelectorRow';
+import CppStandardSelector from '../components/CppStandardSelectorRow';
 
 export default function Home() {
   const [sourceName, setSourceName] = useState<string>();
@@ -115,6 +116,7 @@ export default function Home() {
           checked={isCustomInvocation}
           onChange={onChangeIsCustomInvocation}
         />
+        <CppStandardSelector />
         <JudgeButton isCustomInvocation={isCustomInvocation} />
         <Results isCustomInvocation={isCustomInvocation} />
       </Space>

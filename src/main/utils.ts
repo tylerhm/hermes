@@ -58,6 +58,8 @@ export const langSpecific = (
   return options[lang];
 };
 
+export type CppStandardType = 11 | 14 | 17 | 20;
+
 // Ensure that the cache exists
 export const touchCache = () => {
   makeDir(paths.cache);

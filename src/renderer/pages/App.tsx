@@ -9,6 +9,7 @@ import {
   InstallType,
   MultiCaseCheckerTypeType,
   StoreKeyType,
+  CppStandardType,
 } from '../utils/types';
 
 // Interface so that typescript doesn't get mad about main -> renderer comms
@@ -36,6 +37,7 @@ declare global {
         setEpsilon: (epsilon: number) => void;
         setIsCustomInvocation: (isCustomInvocation: boolean) => void;
         setCustomInvocationInput: (customInvocationInput: string) => void;
+        setCppStandard: (cppStandard: CppStandardType) => void;
         judge: () => void;
         openCaseInfo: (
           caseID: string,
