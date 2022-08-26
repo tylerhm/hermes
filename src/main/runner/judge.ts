@@ -278,7 +278,7 @@ const judgeMultiCase = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
-  const cppStandard = store.get(STORE_KEYS.CPP_STANDARD, 17) as number;
+  const cppStandard = store.get(STORE_KEYS.CPP_STANDARD, 17) as CppStandardType;
 
   /*
    * COMPILATION
@@ -475,6 +475,8 @@ const judgeCustomInvocation = async (event: Electron.IpcMainEvent) => {
     return;
   }
 
+  const cppStandard = store.get(STORE_KEYS.CPP_STANDARD, 17) as CppStandardType;
+
   /*
    * COMPILATION
    */
@@ -483,7 +485,7 @@ const judgeCustomInvocation = async (event: Electron.IpcMainEvent) => {
   // Compile the code
   let compiledPath: string;
   try {
-    compiledPath = await compile(source, lang);
+    compiledPath = await compile(source, lang, cppStandard);
   } catch (err) {
     console.error(err);
     event.reply(CHANNELS.COMPILATION_ERROR);
