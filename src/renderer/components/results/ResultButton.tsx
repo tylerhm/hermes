@@ -65,6 +65,11 @@ const PopoverContent = ({
   const requestInfo = (infoType: InfoType) => {
     eventHandler.openCaseInfo(identifier, infoType, isCustomInvocation);
   };
+
+  const messages = response.messages.map((message) => {
+    return <div>{message}</div>;
+  });
+
   return (
     <div
       style={{
@@ -73,7 +78,7 @@ const PopoverContent = ({
         rowGap: '0.2em',
       }}
     >
-      {response.messages}
+      {messages}
       <Button type="dashed" onClick={() => requestInfo('input')}>
         Input
       </Button>
