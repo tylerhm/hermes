@@ -1,3 +1,5 @@
+# NOW DEPRECATED
+
 <img src=".erb/img/erb-banner.svg" width="100%" />
 
 ## Usage
